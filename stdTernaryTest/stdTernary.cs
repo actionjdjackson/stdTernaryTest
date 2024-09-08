@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace stdTernary
 {
@@ -110,10 +111,77 @@ namespace stdTernary
             return new BalFloat(Math.Cbrt(balFloat.DoubleValue));
         }
 
-        //public static BalFloat TritIncrement(BalFloat balFloat)
-        //{
-        //    //balFloat.Value
-        //}
+        public static BalFloat TritIncrement(BalFloat balFloat)
+        {
+            sbyte carry = 1;
+            BalTrit[] balTrits = new BalTrit[BalFloat.N_TRITS_TOTAL];
+            for (int i = BalFloat.N_TRITS_TOTAL - 1; i >= 0; i--)
+            {
+                sbyte n1 = (sbyte)(balFloat.Value[i].Value + carry);
+                if (n1 == 0)
+                {
+                    balTrits[i] = new BalTrit(0);
+                    carry = 0;
+                }
+                else if (n1 == 1)
+                {
+                    balTrits[i] = new BalTrit(1);
+                    carry = 0;
+                }
+                else if (n1 == 2)
+                {
+                    balTrits[i] = new BalTrit(-1);
+                    carry = 1;
+                }
+                else if (n1 == -1)
+                {
+                    balTrits[i] = new BalTrit(-1);
+                    carry = 0;
+                }
+                else if (n1 == -2)
+                {
+                    balTrits[i] = new BalTrit(1);
+                    carry = -1;
+                }
+            }
+            return new BalFloat(balTrits);
+        }
+
+        public static BalFloat TritDecrement(BalFloat balFloat)
+        {
+            sbyte carry = -1;
+            BalTrit[] balTrits = new BalTrit[BalFloat.N_TRITS_TOTAL];
+            for (int i = BalFloat.N_TRITS_TOTAL - 1; i >= 0; i--)
+            {
+                sbyte n1 = (sbyte)(balFloat.Value[i].Value + carry);
+                if (n1 == 0)
+                {
+                    balTrits[i] = new BalTrit(0);
+                    carry = 0;
+                }
+                else if (n1 == 1)
+                {
+                    balTrits[i] = new BalTrit(1);
+                    carry = 0;
+                }
+                else if (n1 == 2)
+                {
+                    balTrits[i] = new BalTrit(-1);
+                    carry = 1;
+                }
+                else if (n1 == -1)
+                {
+                    balTrits[i] = new BalTrit(-1);
+                    carry = 0;
+                }
+                else if (n1 == -2)
+                {
+                    balTrits[i] = new BalTrit(1);
+                    carry = -1;
+                }
+            }
+            return new BalFloat(balTrits);
+        }
 
 
     }
@@ -434,7 +502,10 @@ namespace stdTernary
         public static BalTryte operator --(BalTryte tryte) => new BalTryte((short)(tryte.shortValue - 1));
         public static BalTryte operator +(BalTryte tryte) => new BalTryte(Math.Abs(tryte.shortValue));
         public static BalTryte operator -(BalTryte tryte) => new BalTryte((short)-Math.Abs(tryte.shortValue));
-
+        public static implicit operator short(BalTryte tryte) => tryte.shortValue;
+        public static implicit operator BalTryte(short shortValue) => new BalTryte(shortValue);
+        public static implicit operator int(BalTryte tryte) => tryte.shortValue;
+        public static implicit operator BalTryte(int intValue) => new BalTryte((short)intValue);
 
 
         public BalTryte SHIFTLEFT(int nTrits)
@@ -454,7 +525,7 @@ namespace stdTernary
             }
             else
             {
-                throw new ArgumentException("Number of trits to shift left is too large for a tryte of " + N_TRITS_PER_TRYTE + " trits", "nTrits");
+                throw new ArgumentOutOfRangeException("Number of trits to shift left is too large for a tryte of " + N_TRITS_PER_TRYTE + " trits", "nTrits");
             }
         }
 
@@ -475,7 +546,7 @@ namespace stdTernary
             }
             else
             {
-                throw new ArgumentException("Number of trits to shift right is too large for a tryte of " + N_TRITS_PER_TRYTE + " trits", "nTrits");
+                throw new ArgumentOutOfRangeException("Number of trits to shift right is too large for a tryte of " + N_TRITS_PER_TRYTE + " trits", "nTrits");
             }
         }
 
@@ -679,7 +750,7 @@ namespace stdTernary
             }
             else
             {
-                throw new ArgumentException("The short value passed to SetValue in BalTryte was too large to fit in a " + N_TRITS_PER_TRYTE + " trit tryte", "value");
+                throw new ArgumentOutOfRangeException("The short value passed to SetValue in BalTryte was too large to fit in a " + N_TRITS_PER_TRYTE + " trit tryte", "value");
             }
         }
 
@@ -728,6 +799,7 @@ namespace stdTernary
 
         public double DoubleValue { get => doubleValue; set => SetValue(value); }
         public BalTrit[] Value { get => wholeBalFloat; set => SetValue(value); }
+        public char[] FloatChars { get => floatChars; set => SetValue(value); }
 
         public static bool operator ==(BalFloat float1, BalFloat float2) => EqualityComparer<BalTrit[]>.Default.Equals(float1.Value, float2.Value);
         public static bool operator !=(BalFloat float1, BalFloat float2) => !EqualityComparer<BalTrit[]>.Default.Equals(float1.Value, float2.Value);
@@ -735,7 +807,6 @@ namespace stdTernary
         public static bool operator <(BalFloat float1, BalFloat float2) => float1.LESSTHAN(float2);
         public static bool operator >=(BalFloat float1, BalFloat float2) => float1.GREATEROREQUAL(float2);
         public static bool operator <=(BalFloat float1, BalFloat float2) => float1.LESSOREQUAL(float2);
-
         public static BalFloat operator +(BalFloat float1, BalFloat float2) => new BalFloat(float1.doubleValue + float2.doubleValue);
         public static BalFloat operator -(BalFloat float1, BalFloat float2) => new BalFloat(float1.doubleValue - float2.doubleValue);
         public static BalFloat operator *(BalFloat float1, BalFloat float2) => new BalFloat(float1.doubleValue * float2.doubleValue);
@@ -745,6 +816,8 @@ namespace stdTernary
         public static BalFloat operator --(BalFloat float1) => new BalFloat(float1.doubleValue -= 1);
         public static BalFloat operator +(BalFloat float1) => new BalFloat(Math.Abs(float1.doubleValue));
         public static BalFloat operator -(BalFloat float1) => new BalFloat(-Math.Abs(float1.doubleValue));
+        public static implicit operator double(BalFloat float1) => float1.DoubleValue;
+        public static implicit operator BalFloat(double doubleValue) => new BalFloat(doubleValue);
 
 
         public bool LESSOREQUAL(BalFloat balFloat)
@@ -873,20 +946,38 @@ namespace stdTernary
         public void SetValue(double value)
         {
             this.doubleValue = value;
-            int exponentValueBase3 = (int)Math.Ceiling((Math.Log(Math.Abs(value)) - Math.Log(0.5)) / Math.Log(3.0));
-            double doubleSignificand = value / Math.Pow(3.0, exponentValueBase3);
-            double remainder = 0.0;
-            (this.significand, remainder) = ConvertDoubleToBalancedTritsWithRemainder(doubleSignificand, N_TRITS_SIGNIFICAND);
-            this.exponent = ConvertIntegerToBalancedTrits(exponentValueBase3, N_TRITS_EXPONENT);
-            for (byte i = 0; i < N_TRITS_EXPONENT; i++)
+            if (value == 0)
             {
-                this.wholeBalFloat[i] = exponent[i];
-                this.floatChars[i] = exponent[i].TritChar;
+                for (byte i = 0; i < N_TRITS_EXPONENT; i++)
+                {
+                    this.wholeBalFloat[i] = new BalTrit(-1);
+                    this.exponent[i] = new BalTrit(-1);
+                    this.floatChars[i] = '-';
+                }
+                for (int i = N_TRITS_EXPONENT; i < N_TRITS_TOTAL; i++)
+                {
+                    this.wholeBalFloat[i] = new BalTrit(0);
+                    this.significand[i - N_TRITS_EXPONENT] = new BalTrit(0);
+                    this.floatChars[i] = '0';
+                }
             }
-            for (int i = N_TRITS_EXPONENT; i < N_TRITS_TOTAL; i++)
+            else
             {
-                this.wholeBalFloat[i] = significand[i - N_TRITS_EXPONENT];
-                this.floatChars[i] = significand[i - N_TRITS_EXPONENT].TritChar;
+                int exponentValueBase3 = (int)Math.Ceiling((Math.Log(Math.Abs(value)) - Math.Log(0.5)) / Math.Log(3.0));
+                double significandValue = value / Math.Pow(3.0, exponentValueBase3);
+                double remainder;
+                (this.significand, remainder) = ConvertDoubleToBalancedTritsWithRemainder(significandValue, N_TRITS_SIGNIFICAND);
+                this.exponent = ConvertIntegerToBalancedTrits(exponentValueBase3, N_TRITS_EXPONENT);
+                for (byte i = 0; i < N_TRITS_EXPONENT; i++)
+                {
+                    this.wholeBalFloat[i] = exponent[i];
+                    this.floatChars[i] = exponent[i].TritChar;
+                }
+                for (int i = N_TRITS_EXPONENT; i < N_TRITS_TOTAL; i++)
+                {
+                    this.wholeBalFloat[i] = significand[i - N_TRITS_EXPONENT];
+                    this.floatChars[i] = significand[i - N_TRITS_EXPONENT].TritChar;
+                }
             }
         }
 
@@ -903,13 +994,7 @@ namespace stdTernary
                 significand[i - N_TRITS_EXPONENT] = value[i];
                 floatChars[i] = value[i].TritChar;
             }
-            int exponentValue = (int)Math.Pow(3, ConvertBalancedTritsToInteger(exponent));
-            //if (exponentValue == MAX_EXPONENT_VALUE)
-            //{
-            //    doubleValue = double.PositiveInfinity
-            //}
-            double significandValue = ConvertBalancedTritsToDouble(significand);
-            doubleValue = significandValue * exponentValue;
+            CreateDoubleValueIncludingSpecialCases();
         }
 
         public void SetValue(char[] value)
@@ -953,7 +1038,39 @@ namespace stdTernary
                     throw new ArgumentException("Invalid character in ternary char array passed to SetValue.", "value");
                 }
             }
+            CreateDoubleValueIncludingSpecialCases();
         }
+
+
+        public void CreateDoubleValueIncludingSpecialCases()
+        {
+            if (exponent.All(t => t.Value == 1))
+            {
+                if (significand.All(t => t.Value == 1))
+                {
+                    doubleValue = double.PositiveInfinity;
+                }
+                else if (significand.All(t => t.Value == -1))
+                {
+                    doubleValue = double.NegativeInfinity;
+                }
+                else if (significand.All(t => t.Value == 0))
+                {
+                    doubleValue = double.NaN;
+                }
+            }
+            else if (significand.All(t => t.Value == 0) && exponent.All(t => t.Value == -1))
+            {
+                doubleValue = 0;
+            }
+            else
+            {
+                int exponentValue = (int)Math.Pow(3, ConvertBalancedTritsToInteger(exponent));
+                double significandValue = ConvertBalancedTritsToDouble(significand);
+                doubleValue = significandValue * exponentValue;
+            }
+        }
+
 
         public static BalTrit[] ConvertIntegerToBalancedTrits(int integerValue, byte nTrits)
         {
