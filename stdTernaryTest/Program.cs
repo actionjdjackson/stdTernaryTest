@@ -33,11 +33,11 @@ namespace stdTernaryTest
             Console.WriteLine(anotherone.Invert()); //inversion is also outputted as a decimal equivalent
 
             var startTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-            Console.WriteLine(startFloat);
-            for (int i = 0; i < 10000; i++)
+            Console.WriteLine(startFloat.ToString());
+            for (int i = 0; i < 100; i++)
             {
                 startFloat = TernaryMath.TritIncrement(startFloat); //trit increment operation 10,000 times
-                //Console.WriteLine(startFloat.ToString());
+                Console.WriteLine(startFloat.ToString());
             }
             var endTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
             Console.WriteLine("\nTernary Trit Increment took " + (endTime - startTime) + " ms\n");
@@ -45,9 +45,10 @@ namespace stdTernaryTest
             var startDouble = 0.0;
             Console.WriteLine(startDouble);
             startTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-            for (int i = 0; i < 10000; i++)
+            for (int i = 0; i < 100; i++)
             {
                 startDouble = Math.BitIncrement(startDouble);   //bit increment operation 10,000 times
+                Console.WriteLine(startDouble.ToString());
             }
             endTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
             Console.WriteLine("\nBinary Bit Increment took " + (endTime - startTime) + " ms\n");
@@ -84,12 +85,13 @@ namespace stdTernaryTest
             {
                 Console.WriteLine("2.71828 is less than 3.14159");
             }
+            // this tests for consistency when converting back and forth between doubles and ternary
             (BalTrit[] trits, var remainder) = BalFloat.ConvertDoubleToBalancedTritsWithRemainder(0.125, BalFloat.N_TRITS_SIGNIFICAND);
             double doub = BalFloat.ConvertBalancedTritsToDouble(trits);
-            Console.WriteLine(doub);
+            Console.WriteLine(doub + " with a remainder of " + remainder);
             (BalTrit[] trits2, var remainder2) = BalFloat.ConvertDoubleToBalancedTritsWithRemainder(doub, BalFloat.N_TRITS_SIGNIFICAND);
             double doub2 = BalFloat.ConvertBalancedTritsToDouble(trits2);
-            Console.WriteLine(doub2);
+            Console.WriteLine(doub2 + " with a remainder of " + remainder2);
 
             var r = new Random();
 
@@ -101,11 +103,11 @@ namespace stdTernaryTest
                 var prod = (d * d2);
                 if (prod < 0.1)
                 {
-                    //
+                    Console.Write(".");
                 }
             }
             endTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-            Console.WriteLine("\n doubles multiplication took " + (endTime - startTime) + " ms\n");
+            Console.WriteLine("\n doubles multiplication with a comparison check took " + (endTime - startTime) + " ms\n");
 
             startTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
             for (int i = 0; i < 10000; i++)
@@ -115,11 +117,11 @@ namespace stdTernaryTest
                 var prod = (example * example2);
                 if (prod < 0.1)
                 {
-                    //
+                    Console.Write(".");
                 }
             }
             endTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-            Console.WriteLine("\n balfloats multiplication took " + (endTime - startTime) + " ms\n");
+            Console.WriteLine("\n balfloats multiplication with a comparison check took " + (endTime - startTime) + " ms\n");
 
             BalInt balInt = 18530201888;
             BalInt balInt2 = 762559748498;

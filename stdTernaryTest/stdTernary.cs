@@ -648,7 +648,7 @@ namespace stdTernary
             }
             else
             {
-                throw new ArgumentException("The trit array passed to BalTryte was not the expected size", "value");
+                throw new ArgumentException("The trit array passed to BalTryte was not the expected size, should be " + N_TRITS_PER_TRYTE + " trits in length", "value");
             }
         }
 
@@ -684,7 +684,7 @@ namespace stdTernary
             }
             else
             {
-                throw new ArgumentException("The character array passed to BalTryte was not the expected size", "value");
+                throw new ArgumentException("The character array passed to BalTryte was not the expected size, should be " + N_TRITS_PER_TRYTE + " chars in length", "value");
             }
         }
 
@@ -808,6 +808,21 @@ namespace stdTernary
         public static explicit operator double(BalInt @int) => @int.integerValue;
 
 
+        public BalInt(BalTrit[] balTrits)
+        {
+            Value = balTrits;
+        }
+
+        public BalInt(char[] balChars)
+        {
+            IntegerChars = balChars;
+        }
+
+        public BalInt(long integer)
+        {
+            IntegerValue = integer;
+        }
+
         public override string ToString()
         {
             return new string(integerChars) + " which equals " + integerValue;
@@ -824,28 +839,20 @@ namespace stdTernary
             return HashCode.Combine(balInt);
         }
 
-        public BalInt(BalTrit[] balTrits)
-        {
-            Value = balTrits;
-        }
-
-        public BalInt(char[] balChars)
-        {
-            IntegerChars = balChars;
-        }
-
-        public BalInt(long integer)
-        {
-            IntegerValue = integer;
-        }
-
         public void SetValue(BalTrit[] value)
         {
-            balInt = value;
-            integerValue = ConvertBalancedTritsToInteger(value);
-            for (int i = 0; i < N_TRITS_PER_INT; i++)
+            if (value.Length == N_TRITS_PER_INT)
             {
-                integerChars[i] = balInt[i].TritChar;
+                balInt = value;
+                integerValue = ConvertBalancedTritsToInteger(value);
+                for (int i = 0; i < N_TRITS_PER_INT; i++)
+                {
+                    integerChars[i] = balInt[i].TritChar;
+                }
+            }
+            else
+            {
+                throw new ArgumentException("BalTrit array passed to BalInt SetValue method was not the expected size - should be " + N_TRITS_PER_INT + " trits in length", "value");
             }
         }
 
@@ -861,27 +868,34 @@ namespace stdTernary
 
         public void SetValue(char[] value)
         {
-            integerChars = value;
-            for (int i = 0; i < N_TRITS_PER_INT; i++)
+            if (value.Length == N_TRITS_PER_INT)
             {
-                if (value[i] == '+')
+                integerChars = value;
+                for (int i = 0; i < N_TRITS_PER_INT; i++)
                 {
-                    balInt[i] = new BalTrit(1);
+                    if (value[i] == '+')
+                    {
+                        balInt[i] = new BalTrit(1);
+                    }
+                    else if (value[i] == '-')
+                    {
+                        balInt[i] = new BalTrit(-1);
+                    }
+                    else if (value[i] == '0')
+                    {
+                        balInt[i] = new BalTrit(0);
+                    }
+                    else
+                    {
+                        throw new ArgumentException("Invalid character encountered in a balanced ternary char array. Please stick to +, -, 0's", "value");
+                    }
                 }
-                else if (value[i] == '-')
-                {
-                    balInt[i] = new BalTrit(-1);
-                }
-                else if (value[i] == '0')
-                {
-                    balInt[i] = new BalTrit(0);
-                }
-                else
-                {
-                    throw new ArgumentException("Invalid character encountered in a balanced ternary char array. Please stick to +, -, 0's");
-                }
+                integerValue = ConvertBalancedTritsToInteger(balInt);
             }
-            integerValue = ConvertBalancedTritsToInteger(balInt);
+            else
+            {
+                throw new ArgumentException("Char array passed to BalInt SetValue method was not the expected size - should be " + N_TRITS_PER_INT + " chars in length", "value");
+            }
         }
 
         public static int ConvertBalancedTritsToInteger(BalTrit[] balTrits)
@@ -1037,12 +1051,12 @@ namespace stdTernary
         public static BalFloat operator %(BalFloat float1, BalFloat float2) => new BalFloat(float1.doubleValue % float2.doubleValue);
         //public static BalFloat operator ++(BalFloat float1) => new BalFloat(float1.doubleValue += 1); 
         //public static BalFloat operator --(BalFloat float1) => new BalFloat(float1.doubleValue -= 1); //not sure if ++ or -- are appropriate for a floating point number
-        public static BalFloat operator +(BalFloat float1) => new BalFloat(Math.Abs(float1.doubleValue));
-        public static BalFloat operator -(BalFloat float1) => new BalFloat(-float1.doubleValue);
+        public static BalFloat operator +(BalFloat @float) => new BalFloat(Math.Abs(@float.doubleValue));
+        public static BalFloat operator -(BalFloat @float) => new BalFloat(-@float.doubleValue);
 
-        public static implicit operator double(BalFloat float1) => float1.DoubleValue;
+        public static implicit operator double(BalFloat @float) => @float.DoubleValue;
         public static implicit operator BalFloat(double doubleVal) => new BalFloat(doubleVal);
-        public static explicit operator string(BalFloat float1) => new string(float1.floatChars);
+        public static explicit operator string(BalFloat @float) => new string(@float.floatChars);
         public static explicit operator BalFloat(string str) => (str.Length == N_TRITS_TOTAL) ? new BalFloat(str.ToCharArray()) : throw new ArithmeticException("Conversion from string to BalFloat unsuccessful because the string was not the expected length.");
 
 
@@ -1267,62 +1281,76 @@ namespace stdTernary
 
         public void SetValue(BalTrit[] value)   //separates the whole balanced float into exponent and significand...
         {
-            this.wholeBalFloat = value;
-            for (byte i = 0; i < N_TRITS_EXPONENT; i++)
+            if (value.Length == N_TRITS_TOTAL)
             {
-                exponent[i] = value[i];
-                floatChars[i] = value[i].TritChar;
+                this.wholeBalFloat = value;
+                for (byte i = 0; i < N_TRITS_EXPONENT; i++)
+                {
+                    exponent[i] = value[i];
+                    floatChars[i] = value[i].TritChar;
+                }
+                for (byte i = N_TRITS_EXPONENT; i < N_TRITS_TOTAL; i++)
+                {
+                    significand[i - N_TRITS_EXPONENT] = value[i];
+                    floatChars[i] = value[i].TritChar;
+                }
+                CreateDoubleValueIncludingSpecialCases();   //...and converts them into a double including infinities and NaNs
             }
-            for (byte i = N_TRITS_EXPONENT; i < N_TRITS_TOTAL; i++)
+            else
             {
-                significand[i - N_TRITS_EXPONENT] = value[i];
-                floatChars[i] = value[i].TritChar;
+                throw new ArgumentException("Trit array passed to BalFloat SetValue method was not the expected size - should be " + N_TRITS_TOTAL + " trits in length", "value");
             }
-            CreateDoubleValueIncludingSpecialCases();   //...and converts them into a double including infinities and NaNs
         }
 
         public void SetValue(char[] value)  // in case we're dealing with strings of +/-/0's this sets the trits to their appropriate values and...
         {
-            this.floatChars = value;
-            for (byte i = 0; i < N_TRITS_EXPONENT; i++)
+            if (value.Length == N_TRITS_TOTAL)
             {
-                if (value[i] == '+')
+                this.floatChars = value;
+                for (byte i = 0; i < N_TRITS_EXPONENT; i++)
                 {
-                    exponent[i] = new BalTrit(1);
+                    if (value[i] == '+')
+                    {
+                        exponent[i] = new BalTrit(1);
+                    }
+                    else if (value[i] == '-')
+                    {
+                        exponent[i] = new BalTrit(-1);
+                    }
+                    else if (value[i] == '0')
+                    {
+                        exponent[i] = new BalTrit(0);
+                    }
+                    else
+                    {
+                        throw new ArgumentException("Invalid character in ternary char array passed to SetValue.", "value");
+                    }
                 }
-                else if (value[i] == '-')
+                for (byte i = N_TRITS_EXPONENT; i < N_TRITS_TOTAL; i++)
                 {
-                    exponent[i] = new BalTrit(-1);
+                    if (value[i] == '+')
+                    {
+                        significand[i - N_TRITS_EXPONENT] = new BalTrit(1);
+                    }
+                    else if (value[i] == '-')
+                    {
+                        significand[i - N_TRITS_EXPONENT] = new BalTrit(-1);
+                    }
+                    else if (value[i] == '0')
+                    {
+                        significand[i - N_TRITS_EXPONENT] = new BalTrit(0);
+                    }
+                    else
+                    {
+                        throw new ArgumentException("Invalid character in ternary char array passed to SetValue.", "value");
+                    }
                 }
-                else if (value[i] == '0')
-                {
-                    exponent[i] = new BalTrit(0);
-                }
-                else
-                {
-                    throw new ArgumentException("Invalid character in ternary char array passed to SetValue.", "value");
-                }
+                CreateDoubleValueIncludingSpecialCases();   //...and does the same conversion to double with special cases
             }
-            for (byte i = N_TRITS_EXPONENT; i < N_TRITS_TOTAL; i++)
+            else
             {
-                if (value[i] == '+')
-                {
-                    significand[i - N_TRITS_EXPONENT] = new BalTrit(1);
-                }
-                else if (value[i] == '-')
-                {
-                    significand[i - N_TRITS_EXPONENT] = new BalTrit(-1);
-                }
-                else if (value[i] == '0')
-                {
-                    significand[i - N_TRITS_EXPONENT] = new BalTrit(0);
-                }
-                else
-                {
-                    throw new ArgumentException("Invalid character in ternary char array passed to SetValue.", "value");
-                }
+                throw new ArgumentException("Char array passed to BalFloat SetValue method was not the expected size - should be " + N_TRITS_TOTAL + " chars in length", "value");
             }
-            CreateDoubleValueIncludingSpecialCases();   //...and does the same conversion to double with special cases
         }
 
 
