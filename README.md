@@ -6,7 +6,7 @@ considered -1 and all positive numbers 1, and zero is 0. I could have used two b
 booleans is actually faster than a `sbyte`, but the consensus seems to be that there is no performance advantage to a bool over a byte.
 
 All bitwise and bytewise operators have been overriden for trits and trytes. I am currently using the `*` operator on trits for XNOR/MULTIPLY and have not used the XOR `^` operator in its place, since XOR is a 
-specifically binary operation, according to Stack Overflow - lol. The classes are `BalTrit` and `BalTryte` - and the `BalTryte` can be modified easily to be any number of trits 
+specifically binary operation, according to Stack Overflow. The classes are `BalTrit` and `BalTryte` - and the `BalTryte` can be modified easily to be any number of trits 
 you want, up to 10 trits with the current implementation. Each `BalTryte` holds a combination of an array of `BalTrit`s, an array of `char`s ( `+ , -, or 0` ), and a `short` value for binary equivalent and doing the 
 math operator overrides like addition, subtraction, multiplication, division, modulus, etc.
 
