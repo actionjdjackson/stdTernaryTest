@@ -11,21 +11,23 @@ namespace stdTernaryTest
             var exampleFloat = new BalFloat(128);
             var exampleIncrement = TernaryMath.TritIncrement(exampleFloat); //increments by one trit
             Console.WriteLine(exampleFloat);    //should be 128
-            Console.WriteLine(exampleIncrement);    //should be 128 + epsilon
+            Console.WriteLine(exampleIncrement);    //should be 128 + smallest value possible in significand
 
-            BalFloat startFloat = 0.333333333333;
+            BalFloat startFloat = 0.333333333333;   //can initialize a BalFloat with a double
             double adouble = startFloat;    //can directly assign a BalFloat to a double
-            startFloat = 1.0;   //can directly assign a decimal number to a BalFloat
-            int whatever = new BalTryte(5);
+            startFloat = 1.0f;   //can directly assign a double or float number to a BalFloat
+
             BalTryte whateverelse = 9800;
             BalTryte anotherone = (BalTryte)"+++++++++";    //explicit casting of a string to a BalTryte
             string yetanotherone = (string)whateverelse;    //explicit casting of a BalType to a string (which only gives the char string of +/-/0, no decimal)
             Console.WriteLine(yetanotherone);
+
             Console.WriteLine(whateverelse);
-            Console.WriteLine(anotherone);  //implicit casting causes WriteLine to write the decimal equivalent of a BalTryte
-            Console.WriteLine(anotherone.Invert());
-            whateverelse.InvertSelf();
+            whateverelse.InvertSelf();      //inversion of self
             Console.WriteLine(whateverelse.ToString()); //ToString() gives the char string of +/-/0 of the BalTryte as well as the decimal equivalent
+
+            Console.WriteLine(anotherone);  //implicit casting causes WriteLine to write the decimal equivalent of a BalTryte
+            Console.WriteLine(anotherone.Invert()); //inversion is also outputted as a decimal equivalent
 
             var startTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
             Console.WriteLine(startFloat);
@@ -65,7 +67,15 @@ namespace stdTernaryTest
             Console.WriteLine(exampleBalFloat2.ToString());
             Console.WriteLine(exampleBalFloat3.ToString());
             var exampleFloatAdd = exampleBalFloat + exampleBalFloat2 + exampleBalFloat3;    //adding checking
+            var exampleFloatSub = exampleBalFloat - exampleBalFloat2 - exampleBalFloat3;    //subtract checking
+            var exampleFloatMult = exampleBalFloat * exampleBalFloat2 * exampleBalFloat3;   //multiply checking
+            var exampleFloatDiv = exampleBalFloat / exampleBalFloat2 / exampleBalFloat3;    //divide checking
+            var exampleFloatPow = TernaryMath.Pow(exampleBalFloat2, exampleBalFloat);          //power checking
             Console.WriteLine(exampleFloatAdd.ToString());
+            Console.WriteLine(exampleFloatSub.ToString());
+            Console.WriteLine(exampleFloatMult.ToString());
+            Console.WriteLine(exampleFloatDiv.ToString());
+            Console.WriteLine(exampleFloatPow.ToString());
             if (exampleBalFloat2 < exampleBalFloat)    //this comparison is done in Ternary, checking the exponent first, then the significand, to see which is bigger
             {
                 Console.WriteLine("2.71828 is less than 3.14159");
@@ -79,7 +89,7 @@ namespace stdTernaryTest
                 var d = r.NextDouble();
                 var d2 = r.NextDouble();
                 var prod = (d * d2);
-                if (prod < 0.5)
+                if (prod < 0.1)
                 {
                     //
                 }
@@ -93,7 +103,7 @@ namespace stdTernaryTest
                 var example = new BalFloat(r.NextDouble());
                 var example2 = new BalFloat(r.NextDouble());
                 var prod = (example * example2);
-                if (prod < 0.5)
+                if (prod < 0.1)
                 {
                     //
                 }

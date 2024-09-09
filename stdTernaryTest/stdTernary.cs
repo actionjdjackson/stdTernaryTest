@@ -119,28 +119,28 @@ namespace stdTernary
             BalTrit[] balTrits = new BalTrit[BalFloat.N_TRITS_TOTAL];
             for (int i = BalFloat.N_TRITS_TOTAL - 1; i >= 0; i--)
             {
-                sbyte n1 = (sbyte)(balFloat.Value[i].Value + carry);
-                if (n1 == 0)
+                sbyte n = (sbyte)(balFloat.Value[i].Value + carry);
+                if (n == 0)
                 {
                     balTrits[i] = new BalTrit(0);
                     carry = 0;
                 }
-                else if (n1 == 1)
+                else if (n == 1)
                 {
                     balTrits[i] = new BalTrit(1);
                     carry = 0;
                 }
-                else if (n1 == 2)
+                else if (n == 2)
                 {
                     balTrits[i] = new BalTrit(-1);
                     carry = 1;
                 }
-                else if (n1 == -1)
+                else if (n == -1)
                 {
                     balTrits[i] = new BalTrit(-1);
                     carry = 0;
                 }
-                else if (n1 == -2)
+                else if (n == -2)
                 {
                     balTrits[i] = new BalTrit(1);
                     carry = -1;
@@ -155,28 +155,28 @@ namespace stdTernary
             BalTrit[] balTrits = new BalTrit[BalFloat.N_TRITS_TOTAL];
             for (int i = BalFloat.N_TRITS_TOTAL - 1; i >= 0; i--)
             {
-                sbyte n1 = (sbyte)(balFloat.Value[i].Value + carry);
-                if (n1 == 0)
+                sbyte n = (sbyte)(balFloat.Value[i].Value + carry);
+                if (n == 0)
                 {
                     balTrits[i] = new BalTrit(0);
                     carry = 0;
                 }
-                else if (n1 == 1)
+                else if (n == 1)
                 {
                     balTrits[i] = new BalTrit(1);
                     carry = 0;
                 }
-                else if (n1 == 2)
+                else if (n == 2)
                 {
                     balTrits[i] = new BalTrit(-1);
                     carry = 1;
                 }
-                else if (n1 == -1)
+                else if (n == -1)
                 {
                     balTrits[i] = new BalTrit(-1);
                     carry = 0;
                 }
-                else if (n1 == -2)
+                else if (n == -2)
                 {
                     balTrits[i] = new BalTrit(1);
                     carry = -1;
@@ -190,8 +190,8 @@ namespace stdTernary
 
 
     /// <summary>
-    /// BALANCED TERNARY TRIT WITH SBYTE AS DATA TYPE FOR -1 , 1, AND 0 VALUES, ALSO WITH TRIT CHARACTER -, +, 0
-    /// Thinking about using two bools or a bool? (three-valued bool with null as a possible value for zero).
+    /// Balanced Ternary Trit with sbyte as datatype for -1 , 1, and 0 values, also with a char for trit characters  -, +, 0
+    /// Considered using two bools or a bool? (three-valued bool with null as a possible value for zero).
     /// On Stack Overflow the answer seems to be that a bool is no faster than a byte, as the binary computer works in
     /// multiples of bytes, not on individual bits. Sticking with an sbyte for now.
     /// </summary>
@@ -282,11 +282,13 @@ namespace stdTernary
         public static bool operator <(BalTrit trit1, BalTrit trit2) => trit1.Value < trit2.Value;
         public static bool operator >=(BalTrit trit1, BalTrit trit2) => trit1.Value >= trit2.Value;
         public static bool operator <=(BalTrit trit1, BalTrit trit2) => trit1.Value <= trit2.Value;
+        public static bool operator true(BalTrit trit) => trit.Value == 1;
+        public static bool operator false(BalTrit trit) => trit.Value == -1;
 
         public static implicit operator sbyte(BalTrit trit) => trit.trit;
         public static implicit operator BalTrit(sbyte sb) => (sb <= 1 && sb >= -1) ? new BalTrit(sb) : throw new ArithmeticException("Tried to assign a value too big for BalTrit - keep it to -1, 0, or 1");
         public static implicit operator int(BalTrit trit) => trit.trit;
-        public static implicit operator BalTrit(int i) => (i <= 1 && i >= -1) ? new BalTrit((sbyte)i) : throw new ArithmeticException("Tried to assign a value too big for BalTrit -  keep it to -1, 0, or 1");
+        public static implicit operator BalTrit(int @int) => (@int <= 1 && @int >= -1) ? new BalTrit((sbyte)@int) : throw new ArithmeticException("Tried to assign a value too big for BalTrit -  keep it to -1, 0, or 1");
 
         public BalTrit NEG()
         {
@@ -313,7 +315,7 @@ namespace stdTernary
             }
             else
             {
-                throw new Exception("Unknown state of trits in SUM operation.");
+                throw new ArgumentException("Unknown state of trit in SUM operation.", "btrit");
             }
         }
 
@@ -788,8 +790,8 @@ namespace stdTernary
         public static BalInt operator *(BalInt int1, BalInt int2) => new BalInt(int1.integerValue * int2.integerValue);
         public static BalInt operator /(BalInt int1, BalInt int2) => new BalInt(int1.integerValue / int2.integerValue);
         public static BalInt operator %(BalInt int1, BalInt int2) => new BalInt(int1.integerValue % int2.integerValue);
-        public static BalInt operator <<(BalInt int1, int nTrits) => int1.SHIFTLEFT(nTrits);
-        public static BalInt operator >>(BalInt int1, int nTrits) => int1.SHIFTRIGHT(nTrits);
+        public static BalInt operator <<(BalInt @int, int nTrits) => @int.SHIFTLEFT(nTrits);
+        public static BalInt operator >>(BalInt @int, int nTrits) => @int.SHIFTRIGHT(nTrits);
         public static BalInt operator ++(BalInt @int) => new BalInt(@int.integerValue + 1);
         public static BalInt operator --(BalInt @int) => new BalInt(@int.integerValue - 1);
         public static BalInt operator +(BalInt @int) => new BalInt(Math.Abs(@int.integerValue));
@@ -803,6 +805,7 @@ namespace stdTernary
         public static explicit operator string(BalInt @int) => new string(@int.integerChars);
         public static explicit operator BalInt(string str) => (str.Length == N_TRITS_PER_INT) ? new BalInt(str.ToCharArray()) : throw new ArithmeticException("Converting a string to a BalInt failed because it wasn't the expected length (" + N_TRITS_PER_INT + " trits)");
         public static explicit operator double(BalInt @int) => @int.integerValue;
+
 
         public override string ToString()
         {
