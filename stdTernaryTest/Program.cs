@@ -66,9 +66,9 @@ namespace stdTernaryTest
             Console.WriteLine(exampleBalFloat3.ToString());
             var exampleFloatAdd = exampleBalFloat + exampleBalFloat2 + exampleBalFloat3;    //adding checking
             Console.WriteLine(exampleFloatAdd.ToString());
-            if (exampleBalFloat2 < exampleBalFloat3)    //this comparison is done in Ternary, checking the exponent first, then the significand, to see which is bigger
+            if (exampleBalFloat2 < exampleBalFloat)    //this comparison is done in Ternary, checking the exponent first, then the significand, to see which is bigger
             {
-                Console.WriteLine("2.7 is less than 100");
+                Console.WriteLine("2.71828 is less than 3.14159");
             }
 
             var r = new Random();
@@ -76,9 +76,13 @@ namespace stdTernaryTest
             startTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
             for (int i = 0; i < 10000; i++)
             {
-                var d = r.NextDouble() * r.Next();
-                var d2 = r.NextDouble() * r.Next();
+                var d = r.NextDouble();
+                var d2 = r.NextDouble();
                 var prod = (d * d2);
+                if (prod < 0.5)
+                {
+                    //
+                }
             }
             endTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
             Console.WriteLine("\n doubles multiplication took " + (endTime - startTime) + " ms\n");
@@ -86,12 +90,21 @@ namespace stdTernaryTest
             startTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
             for (int i = 0; i < 10000; i++)
             {
-                var example = new BalFloat(r.NextDouble() * r.Next());
-                var example2 = new BalFloat(r.NextDouble() * r.Next());
+                var example = new BalFloat(r.NextDouble());
+                var example2 = new BalFloat(r.NextDouble());
                 var prod = (example * example2);
+                if (prod < 0.5)
+                {
+                    //
+                }
             }
             endTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
             Console.WriteLine("\n balfloats multiplication took " + (endTime - startTime) + " ms\n");
+
+            BalInt balInt = 18530201888;
+            BalInt balInt2 = 762559748498;
+            BalInt sum = balInt + balInt2;
+            Console.WriteLine(sum.ToString());
 
         }
     }

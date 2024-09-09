@@ -508,7 +508,7 @@ namespace stdTernary
         public static BalTryte operator ++(BalTryte tryte) => new BalTryte((short)(tryte.shortValue + 1));
         public static BalTryte operator --(BalTryte tryte) => new BalTryte((short)(tryte.shortValue - 1));
         public static BalTryte operator +(BalTryte tryte) => new BalTryte(Math.Abs(tryte.shortValue));
-        public static BalTryte operator -(BalTryte tryte) => new BalTryte((short)-Math.Abs(tryte.shortValue));
+        public static BalTryte operator -(BalTryte tryte) => new BalTryte((short)-tryte.shortValue);
         public static implicit operator short(BalTryte tryte) => tryte.shortValue;
         public static implicit operator BalTryte(short shortValue) => (shortValue <= MAX_POSITIVE_INTEGER && shortValue >= MAX_NEGATIVE_INTEGER) ? new BalTryte(shortValue) : throw new ArithmeticException("Tried to assign to a tryte a short that has a magnitude too big for a tryte of " + N_TRITS_PER_TRYTE + " trits");
         public static implicit operator int(BalTryte tryte) => tryte.shortValue;
@@ -791,12 +791,232 @@ namespace stdTernary
         }
     }
 
+    /// <summary>
+    /// The BalInt class is a modifiable general purpose Balanced Ternary integer, with an array of trits, chars, and a long for the values it holds.
+    /// All the math is done in binary and converted to ternary. Trit-shifting is done in Ternary. Can be explicitly cast to a string of +, -, 0's
+    /// </summary>
+    public class BalInt
+    {
+        public static byte N_TRITS_PER_INT = 27;
+        public static long MAX_POSITIVE_INTEGER = (long)(Math.Pow(3, N_TRITS_PER_INT) - 1) / 2;
+        public static long MAX_NEGATIVE_INTEGER = -MAX_POSITIVE_INTEGER;
 
+        private BalTrit[] balInt = new BalTrit[N_TRITS_PER_INT];
+        private char[] integerChars = new char[N_TRITS_PER_INT];
+        private long integerValue;
 
+        public BalTrit[] Value { get => balInt; set => SetValue(value); }
+        public char[] IntegerChars { get => integerChars; set => SetValue(value); }
+        public long IntegerValue { get => integerValue; set => SetValue(value); }
+
+        public static bool operator ==(BalInt int1, BalInt int2) => EqualityComparer<BalTrit[]>.Default.Equals(int1.Value, int2.Value);
+        public static bool operator !=(BalInt int1, BalInt int2) => !EqualityComparer<BalTrit[]>.Default.Equals(int1.Value, int2.Value);
+        public static bool operator >(BalInt int1, BalInt int2) => int1.integerValue > int2.integerValue;
+        public static bool operator <(BalInt int1, BalInt int2) => int1.integerValue < int2.integerValue;
+        public static bool operator >=(BalInt int1, BalInt int2) => int1.integerValue >= int2.integerValue;
+        public static bool operator <=(BalInt int1, BalInt int2) => int1.integerValue <= int2.integerValue;
+        public static BalInt operator +(BalInt int1, BalInt int2) => new BalInt(int1.integerValue + int2.integerValue);
+        public static BalInt operator -(BalInt int1, BalInt int2) => new BalInt(int1.integerValue - int2.integerValue);
+        public static BalInt operator *(BalInt int1, BalInt int2) => new BalInt(int1.integerValue * int2.integerValue);
+        public static BalInt operator /(BalInt int1, BalInt int2) => new BalInt(int1.integerValue / int2.integerValue);
+        public static BalInt operator %(BalInt int1, BalInt int2) => new BalInt(int1.integerValue % int2.integerValue);
+        public static BalInt operator <<(BalInt int1, int nTrits) => int1.SHIFTLEFT(nTrits);
+        public static BalInt operator >>(BalInt int1, int nTrits) => int1.SHIFTRIGHT(nTrits);
+        public static BalInt operator ++(BalInt @int) => new BalInt(@int.integerValue + 1);
+        public static BalInt operator --(BalInt @int) => new BalInt(@int.integerValue - 1);
+        public static BalInt operator +(BalInt @int) => new BalInt(Math.Abs(@int.integerValue));
+        public static BalInt operator -(BalInt @int) => new BalInt(-@int.integerValue);
+        public static implicit operator long(BalInt @int) => @int.integerValue;
+        public static implicit operator BalInt(long @int) => (@int <= MAX_POSITIVE_INTEGER && @int >= MAX_NEGATIVE_INTEGER) ? new BalInt(@int) : throw new ArithmeticException("Converting a long value to a BalInt failed because it was outside the range of the BalInt implementation");
+        public static implicit operator int(BalInt @int) => (@int <= int.MaxValue && @int >= int.MinValue) ? (int)@int.integerValue : throw new ArithmeticException("Converting a BalInt to an int failed because the value was outside the range of the int max/min values");
+        public static implicit operator BalInt(int @int) => (@int <= MAX_POSITIVE_INTEGER && @int >= MAX_NEGATIVE_INTEGER) ? new BalInt(@int) : throw new ArithmeticException("Converting an int value to a BalInt failed because it was outside the range of the BalInt implementation");
+        public static implicit operator short(BalInt @int) => (@int <= short.MaxValue && @int >= short.MinValue) ? (short)@int.integerValue : throw new ArithmeticException("Converting a BalInt to a short failed because the value was outside the range of the short max/min values");
+        public static implicit operator BalInt(short @int) => (@int <= MAX_POSITIVE_INTEGER && @int >= MAX_NEGATIVE_INTEGER) ? new BalInt(@int) : throw new ArithmeticException("Converting a short value to a BalInt failed because it was outside the range of the BalInt implementation");
+        public static explicit operator string(BalInt @int) => new string(@int.integerChars);
+        public static explicit operator BalInt(string str) => (str.Length == N_TRITS_PER_INT) ? new BalInt(str.ToCharArray()) : throw new ArithmeticException("Converting a string to a BalInt failed because it wasn't the expected length (" + N_TRITS_PER_INT + " trits)");
+        public static explicit operator double(BalInt @int) => @int.integerValue;
+
+        public override string ToString()
+        {
+            return new string(integerChars) + " which equals " + integerValue;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is BalInt @int &&
+                   EqualityComparer<BalTrit[]>.Default.Equals(balInt, @int.balInt);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(balInt);
+        }
+
+        public BalInt(BalTrit[] balTrits)
+        {
+            Value = balTrits;
+        }
+
+        public BalInt(char[] balChars)
+        {
+            IntegerChars = balChars;
+        }
+
+        public BalInt(long integer)
+        {
+            IntegerValue = integer;
+        }
+
+        public void SetValue(BalTrit[] value)
+        {
+            balInt = value;
+            integerValue = ConvertBalancedTritsToInteger(value);
+            for (int i = 0; i < N_TRITS_PER_INT; i++)
+            {
+                integerChars[i] = balInt[i].TritChar;
+            }
+        }
+
+        public void SetValue(long value)
+        {
+            integerValue = value;
+            balInt = ConvertIntegerToBalancedTrits(value);
+            for (int i = 0; i < N_TRITS_PER_INT; i++)
+            {
+                integerChars[i] = balInt[i].TritChar;
+            }
+        }
+
+        public void SetValue(char[] value)
+        {
+            integerChars = value;
+            for (int i = 0; i < N_TRITS_PER_INT; i++)
+            {
+                if (value[i] == '+')
+                {
+                    balInt[i] = new BalTrit(1);
+                }
+                else if (value[i] == '-')
+                {
+                    balInt[i] = new BalTrit(-1);
+                }
+                else if (value[i] == '0')
+                {
+                    balInt[i] = new BalTrit(0);
+                }
+                else
+                {
+                    throw new ArgumentException("Invalid character encountered in a balanced ternary char array. Please stick to +, -, 0's");
+                }
+            }
+            integerValue = ConvertBalancedTritsToInteger(balInt);
+        }
+
+        public static int ConvertBalancedTritsToInteger(BalTrit[] balTrits)
+        {
+            var workTrits = balTrits;
+            Array.Reverse(workTrits);   //easier to work with the array of trits reversed
+            int sum = 0;
+            short exponent = 0;
+            foreach (var trit in workTrits)
+            {
+                sum += (int)(trit.Value * Math.Pow(3, exponent));   //exponent increases as the invisible index increases, and adds to the sum if the trit is -1 or 1
+                exponent++;
+            }
+            return sum;
+        }
+
+        public static BalTrit[] ConvertIntegerToBalancedTrits(long intValue)
+        {
+            BalTrit[] balTrits = new BalTrit[N_TRITS_PER_INT];
+            long workValue = Math.Abs(intValue);     //easier to work with a positive number...
+            if (workValue <= MAX_POSITIVE_INTEGER)  //make sure the value passed in is within the nTrits passed maximum value
+            {
+                byte i = 0;
+                while (workValue != 0)      //easier to start with index 0 - greater numbers on the right
+                {
+                    switch (workValue % 3)
+                    {
+                        case 0:
+                            balTrits[i] = new BalTrit(0);
+                            break;
+                        case 1:
+                            balTrits[i] = new BalTrit(1);
+                            break;
+                        case 2:
+                            balTrits[i] = new BalTrit(-1);
+                            break;
+                    }
+                    workValue = (workValue + 1) / 3;
+                    i++;
+                }
+                for (int j = i; j < N_TRITS_PER_INT; j++)
+                {
+                    balTrits[j] = new BalTrit(0);   //...add zeros to fill in to make the length match the nTrits passed in
+                }
+                if (intValue < 0)   //...and invert if it was negative
+                {
+                    foreach (var trit in balTrits)
+                    {
+                        trit.Value = ~trit;
+                    }
+                }
+                Array.Reverse(balTrits);    //...and reverse the trit order so greater numbers are on the left
+                return balTrits;
+            }
+            else
+            {
+                throw new ArgumentException("The integer value passed to ConvertIntegerToBalancedTrits is too large for the number of trits passed.", "intValue");
+            }
+        }
+
+        public BalInt SHIFTLEFT(int nTrits)
+        {
+            if (nTrits < N_TRITS_PER_INT)
+            {
+                var temp = new BalTrit[N_TRITS_PER_INT];
+                Array.Copy(this.balInt, nTrits, temp, 0, N_TRITS_PER_INT - nTrits);
+                for (int i = 0; i < N_TRITS_PER_INT; i++)
+                {
+                    if (((object)temp[i]) == null)
+                    {
+                        temp[i] = new BalTrit(0);
+                    }
+                }
+                return new BalInt(temp);
+            }
+            else
+            {
+                throw new ArgumentOutOfRangeException("Number of trits to shift left is too large for a BalInt of " + N_TRITS_PER_INT + " trits", "nTrits");
+            }
+        }
+
+        public BalInt SHIFTRIGHT(int nTrits)
+        {
+            if (nTrits < N_TRITS_PER_INT)
+            {
+                var temp = new BalTrit[N_TRITS_PER_INT];
+                Array.Copy(this.balInt, 0, temp, nTrits, N_TRITS_PER_INT - nTrits);
+                for (int i = 0; i < N_TRITS_PER_INT; i++)
+                {
+                    if (((object)temp[i]) == null)
+                    {
+                        temp[i] = new BalTrit(0);
+                    }
+                }
+                return new BalInt(temp);
+            }
+            else
+            {
+                throw new ArgumentOutOfRangeException("Number of trits to shift right is too large for a BalInt of " + N_TRITS_PER_INT + " trits", "nTrits");
+            }
+            
+        }
+    }
 
 
     /// <summary>
-    /// The BalFloat class is a modifiable general purpose floating point number with trits, chars, and a double. Might get rid of the chars because
+    /// The BalFloat class is a modifiable general purpose Balanced Ternary floating point number with trits, chars, and a double. Might get rid of the chars because
     /// it slows things down, but it's intended for interoperability with my Action Ternary Simulator project, which uses strings of +/-/0's
     /// </summary>
     public class BalFloat
@@ -830,7 +1050,7 @@ namespace stdTernary
         //public static BalFloat operator ++(BalFloat float1) => new BalFloat(float1.doubleValue += 1); 
         //public static BalFloat operator --(BalFloat float1) => new BalFloat(float1.doubleValue -= 1); //not sure if ++ or -- are appropriate for a floating point number?
         public static BalFloat operator +(BalFloat float1) => new BalFloat(Math.Abs(float1.doubleValue));
-        public static BalFloat operator -(BalFloat float1) => new BalFloat(-Math.Abs(float1.doubleValue));
+        public static BalFloat operator -(BalFloat float1) => new BalFloat(-float1.doubleValue);
         public static implicit operator double(BalFloat float1) => float1.DoubleValue;
         public static implicit operator BalFloat(double doubleVal) => new BalFloat(doubleVal);
         public static explicit operator string(BalFloat float1) => new string(float1.floatChars);
