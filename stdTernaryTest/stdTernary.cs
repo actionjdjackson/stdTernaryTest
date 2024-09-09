@@ -414,49 +414,11 @@ namespace stdTernary
     }
 
 
-    // NINE TRIT TRYTE
-
-    public class BalTryte9 : BalTryte
-    {
-        public static new byte N_TRITS_PER_TRYTE = 9;
-
-        public BalTryte9(BalTrit[] value) : base(value)
-        {
-        }
-
-        public BalTryte9(short shortValue) : base(shortValue)
-        {
-        }
-
-        public BalTryte9(char[] tryteChars) : base(tryteChars)
-        {
-        }
-    }
-
-    // SIX TRIT TRYTE
-
-    public class BalTryte6 : BalTryte
-    {
-        public static new byte N_TRITS_PER_TRYTE = 6;
-
-        public BalTryte6(BalTrit[] value) : base(value)
-        {
-        }
-
-        public BalTryte6(short shortValue) : base(shortValue)
-        {
-        }
-
-        public BalTryte6(char[] tryteChars) : base(tryteChars)
-        {
-        }
-    }
-
-
-
-    // BALANCED TERNARY GENERIC TRYTE
-
-
+    /// <summary>
+    /// A customizable Balanced Ternary tryte data type/class with a range of 2 - 10 trits per tryte. Bytewise operators have been overridden
+    /// for everything except ^ (XOR) - which is a specifically binary operation. I might use ^ for XNOR/MULTIPLY but not sure. There is a
+    /// BTCOMPARISON method which is for the <=> spaceship operator - but C# doesn't allow custom operators.
+    /// </summary>
     public class BalTryte
     {
         public static byte N_TRITS_PER_TRYTE = 9;   //can be from 2 - 10 trits
@@ -647,7 +609,7 @@ namespace stdTernary
             return newTryte;
         }
 
-        public static BalTrit TCOMPARISON(BalTryte tryte1, BalTryte tryte2)
+        public static BalTrit BTCOMPARISON(BalTryte tryte1, BalTryte tryte2)
         {
             for (int i = 0; i < N_TRITS_PER_TRYTE; i++)
             {
@@ -976,6 +938,22 @@ namespace stdTernary
             }
         }
 
+        public static BalTrit BTCOMPARISON(BalInt int1, BalInt int2)
+        {
+            for (int i = 0; i < N_TRITS_PER_INT; i++)
+            {
+                if (int1.Value[i] > int2.Value[i])
+                {
+                    return new BalTrit(1);
+                }
+                else if (int1.Value[i] < int2.Value[i])
+                {
+                    return new BalTrit(-1);
+                }
+            }
+            return new BalTrit(0);
+        }
+
         public BalInt SHIFTLEFT(int nTrits)
         {
             if (nTrits < N_TRITS_PER_INT)
@@ -1062,6 +1040,22 @@ namespace stdTernary
         public static explicit operator string(BalFloat float1) => new string(float1.floatChars);
         public static explicit operator BalFloat(string str) => (str.Length == N_TRITS_TOTAL) ? new BalFloat(str.ToCharArray()) : throw new ArithmeticException("Conversion from string to BalFloat unsuccessful because the string was not the expected length.");
 
+
+        public static BalTrit BTCOMPARISON(BalFloat float1, BalFloat float2)
+        {
+            for (int i = 0; i < N_TRITS_TOTAL; i++)
+            {
+                if (float1.Value[i] > float2.Value[i])
+                {
+                    return new BalTrit(1);
+                }
+                else if (float1.Value[i] < float2.Value[i])
+                {
+                    return new BalTrit(-1);
+                }
+            }
+            return new BalTrit(0);
+        }
 
         public bool LESSOREQUAL(BalFloat balFloat)
         {
