@@ -20,7 +20,7 @@ Also includes most of the `Math` functions specifically for use with these `BalF
 
 The `char[]` value is for interoperability with my "Action Ternary Simulator" which runs on strings of `+, -, and 0` characters and does all the math in Ternary.
 
-Planning on a customizable `BalInt` in the near future as well. Might include unbalanced ternary versions of these classes, too.
+Might include unbalanced ternary versions of these classes, too.
 
 `BalTryte` and `BalFloat` and `BalInt` have modifiable static integer values which is where you can "customize" them to certain sizes - `N_TRITS_PER_TRYTE`, and `N_TOTAL_TRITS` (`N_TRITS_SIGNIFICAND` and `N_TRITS_EXPONENT` too), and `N_TRITS_PER_INT` respectively.
 
