@@ -942,11 +942,11 @@ namespace stdTernary
         {
             for (int i = 0; i < N_TRITS_PER_INT; i++)
             {
-                if (int1.Value[i] > int2.Value[i])
+                if (int1.balInt[i] > int2.balInt[i])
                 {
                     return new BalTrit(1);
                 }
-                else if (int1.Value[i] < int2.Value[i])
+                else if (int1.balInt[i] < int2.balInt[i])
                 {
                     return new BalTrit(-1);
                 }
@@ -1043,13 +1043,24 @@ namespace stdTernary
 
         public static BalTrit BTCOMPARISON(BalFloat float1, BalFloat float2)
         {
-            for (int i = 0; i < N_TRITS_TOTAL; i++)
+            for (int i = 0; i < N_TRITS_EXPONENT; i++)
             {
-                if (float1.Value[i] > float2.Value[i])
+                if (float1.exponent[i] > float2.exponent[i])
                 {
                     return new BalTrit(1);
                 }
-                else if (float1.Value[i] < float2.Value[i])
+                else if (float1.exponent[i] < float2.exponent[i])
+                {
+                    return new BalTrit(-1);
+                }
+            }
+            for (int i = 0; i < N_TRITS_SIGNIFICAND; i++)
+            {
+                if (float1.significand[i] > float2.significand[i])
+                {
+                    return new BalTrit(1);
+                }
+                else if (float1.significand[i] < float2.significand[i])
                 {
                     return new BalTrit(-1);
                 }
