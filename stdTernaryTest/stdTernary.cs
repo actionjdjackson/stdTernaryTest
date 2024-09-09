@@ -266,7 +266,7 @@ namespace stdTernary
             }
             else
             {
-                throw new ArgumentException("SetValue not given a valid ternary character. Should be 0, +, or -.", "charValue");
+                throw new ArgumentException("BalTrit SetValue not given a valid ternary character. Should be 0, +, or -.", "charValue");
             }
         }
 
@@ -283,8 +283,9 @@ namespace stdTernary
         public static bool operator >=(BalTrit trit1, BalTrit trit2) => trit1.Value >= trit2.Value;
         public static bool operator <=(BalTrit trit1, BalTrit trit2) => trit1.Value <= trit2.Value;
         public static bool operator true(BalTrit trit) => trit.Value == 1;
-        public static bool operator false(BalTrit trit) => trit.Value == -1;
+        public static bool operator false(BalTrit trit) => trit.Value == -1 || trit.Value == 0;
 
+        public static explicit operator bool(BalTrit trit) => trit.trit == 1;
         public static implicit operator sbyte(BalTrit trit) => trit.trit;
         public static implicit operator BalTrit(sbyte sb) => (sb <= 1 && sb >= -1) ? new BalTrit(sb) : throw new ArithmeticException("Tried to assign a value too big for BalTrit - keep it to -1, 0, or 1");
         public static implicit operator int(BalTrit trit) => trit.trit;
@@ -1009,8 +1010,8 @@ namespace stdTernary
     public class BalFloat
     {
         public static byte N_TRITS_TOTAL = 27;  //here is where you can specify what number of trits you want to use for the BalFloat
-        public static byte N_TRITS_SIGNIFICAND = (byte)Math.Ceiling((double)(N_TRITS_TOTAL * 2 / 3));  //calculates the significand size as 2/3 of the total - may be a bit lean, might try 3/4
-        public static byte N_TRITS_EXPONENT = (byte)Math.Floor((double)(N_TRITS_TOTAL / 3));    //calculates the exponent size as 1/3 of the total - may be a bit excessive, might try 1/4
+        public static byte N_TRITS_SIGNIFICAND = (byte)Math.Ceiling((double)N_TRITS_TOTAL * 3 / 4);  //calculates the significand size as 2/3 of the total - may be a bit lean, might try 3/4
+        public static byte N_TRITS_EXPONENT = (byte)Math.Floor((double)N_TRITS_TOTAL / 4);    //calculates the exponent size as 1/3 of the total - may be a bit excessive, might try 1/4
         public static byte N_DIGITS_PRECISION = (byte)Math.Abs(Math.Ceiling(Math.Log10(1 / Math.Pow(3, N_TRITS_SIGNIFICAND)))); //how many digits of precision?
 
         private BalTrit[] exponent = new BalTrit[N_TRITS_EXPONENT];
@@ -1019,7 +1020,7 @@ namespace stdTernary
         private double doubleValue;
         private char[] floatChars = new char[N_TRITS_TOTAL];
 
-        public double DoubleValue { get => doubleValue; set => SetValue(value); }   //when we access the three value types, they are calling the appropriate SetValue function for that type
+        public double DoubleValue { get => doubleValue; set => SetValue(value); }   //when we modify the three value types, they are calling the appropriate SetValue function for that type
         public BalTrit[] Value { get => wholeBalFloat; set => SetValue(value); }
         public char[] FloatChars { get => floatChars; set => SetValue(value); }
 
@@ -1035,13 +1036,30 @@ namespace stdTernary
         public static BalFloat operator /(BalFloat float1, BalFloat float2) => new BalFloat(float1.doubleValue / float2.doubleValue);
         public static BalFloat operator %(BalFloat float1, BalFloat float2) => new BalFloat(float1.doubleValue % float2.doubleValue);
         //public static BalFloat operator ++(BalFloat float1) => new BalFloat(float1.doubleValue += 1); 
-        //public static BalFloat operator --(BalFloat float1) => new BalFloat(float1.doubleValue -= 1); //not sure if ++ or -- are appropriate for a floating point number?
+        //public static BalFloat operator --(BalFloat float1) => new BalFloat(float1.doubleValue -= 1); //not sure if ++ or -- are appropriate for a floating point number
         public static BalFloat operator +(BalFloat float1) => new BalFloat(Math.Abs(float1.doubleValue));
         public static BalFloat operator -(BalFloat float1) => new BalFloat(-float1.doubleValue);
+
         public static implicit operator double(BalFloat float1) => float1.DoubleValue;
         public static implicit operator BalFloat(double doubleVal) => new BalFloat(doubleVal);
         public static explicit operator string(BalFloat float1) => new string(float1.floatChars);
         public static explicit operator BalFloat(string str) => (str.Length == N_TRITS_TOTAL) ? new BalFloat(str.ToCharArray()) : throw new ArithmeticException("Conversion from string to BalFloat unsuccessful because the string was not the expected length.");
+
+
+        public BalFloat(double doubleValue)     //constructor calls the double property
+        {
+            DoubleValue = doubleValue;
+        }
+
+        public BalFloat(BalTrit[] wholeBalFloat)    //constructor calls the BalTrit[] property
+        {
+            Value = wholeBalFloat;
+        }
+
+        public BalFloat(char[] charValue)   //constructor calls the char[] property
+        {
+            FloatChars = charValue;
+        }
 
 
         public static BalTrit BTCOMPARISON(BalFloat float1, BalFloat float2)
@@ -1177,21 +1195,6 @@ namespace stdTernary
                 }
             }
             return false;
-        }
-
-        public BalFloat(double doubleValue)     //constructor calls the double property
-        {
-            DoubleValue = doubleValue;
-        }
-
-        public BalFloat(BalTrit[] wholeBalFloat)    //constructor calls the BalTrit[] property
-        {
-            Value = wholeBalFloat;
-        }
-
-        public BalFloat(char[] charValue)   //constructor calls the char[] property
-        {
-            FloatChars = charValue;
         }
 
         public override string ToString()
@@ -1346,7 +1349,7 @@ namespace stdTernary
             }
             else      //real numbers calculated here
             {
-                int exponentValue = (int)Math.Pow(3, ConvertBalancedTritsToInteger(exponent));  //integer for the exponent
+                double exponentValue = (double)Math.Pow(3, ConvertBalancedTritsToInteger(exponent));  //integer for the exponent
                 double significandValue = ConvertBalancedTritsToDouble(significand);    //and double for the significand
                 doubleValue = significandValue * exponentValue; // multiply them together to get the final value
             }
@@ -1429,16 +1432,17 @@ namespace stdTernary
             var sum = doubleValue;  //start with the sum total
             for (int exponent = 1; exponent <= nTrits; exponent++)  //start with 1/3
             {
-                var magnitudeDiffNeg = Math.Abs(sum + Math.Pow(3.0, -exponent));
-                var magnitudeDiffPos = Math.Abs(sum - Math.Pow(3.0, -exponent));
-                if ((magnitudeDiffNeg < magnitudeDiffPos) && magnitudeDiffNeg < Math.Abs(sum))  //is the negative difference smaller? smaller than if it's zero?
+                var place = Math.Pow(3.0, -exponent);
+                var diffNegative = Math.Abs(sum - -place);
+                var diffPositive = Math.Abs(sum - +place);
+                if ((diffNegative < diffPositive) && diffNegative < Math.Abs(sum))  //is the negative difference smaller? smaller than if it's a zero?
                 {
-                    sum -= -1 * Math.Pow(3.0, -exponent);   //subtract negative if negative was smaller
+                    sum -= -place;   //subtract negative from sum if negative was smaller
                     balTrits[exponent - 1] = new BalTrit(-1);
                 }
-                else if ((magnitudeDiffPos < magnitudeDiffNeg) && magnitudeDiffPos < Math.Abs(sum)) //is the positive difference smaller? smaller than if it's zero?
+                else if ((diffPositive < diffNegative) && diffPositive < Math.Abs(sum)) //is the positive difference smaller? smaller than if it's a zero?
                 {
-                    sum -= 1 * Math.Pow(3.0, -exponent);    //subtract positive if positive was smaller
+                    sum -= +place;    //subtract positive from sum if positive was smaller
                     balTrits[exponent - 1] = new BalTrit(1);
                 }
                 else

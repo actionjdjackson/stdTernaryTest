@@ -8,6 +8,9 @@ namespace stdTernaryTest
         static void Main(string[] args)
         {
 
+            Console.WriteLine(BalFloat.N_TRITS_TOTAL);
+            Console.WriteLine(BalFloat.N_TRITS_EXPONENT);
+            Console.WriteLine(BalFloat.N_TRITS_SIGNIFICAND);
             var exampleFloat = new BalFloat(128);
             var exampleIncrement = TernaryMath.TritIncrement(exampleFloat); //increments by one trit
             Console.WriteLine(exampleFloat);    //should be 128
@@ -15,7 +18,7 @@ namespace stdTernaryTest
 
             BalFloat startFloat = 0.333333333333;   //can initialize a BalFloat with a double
             double adouble = startFloat;    //can directly assign a BalFloat to a double
-            startFloat = 1.0f;   //can directly assign a double or float number to a BalFloat
+            startFloat = 0.0f;   //can directly assign a double or float number to a BalFloat
 
             BalTryte whateverelse = 9800;
             BalTryte anotherone = (BalTryte)"+++++++++";    //explicit casting of a string to a BalTryte
@@ -34,6 +37,7 @@ namespace stdTernaryTest
             for (int i = 0; i < 10000; i++)
             {
                 startFloat = TernaryMath.TritIncrement(startFloat); //trit increment operation 10,000 times
+                //Console.WriteLine(startFloat.ToString());
             }
             var endTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
             Console.WriteLine("\nTernary Trit Increment took " + (endTime - startTime) + " ms\n");
@@ -80,6 +84,12 @@ namespace stdTernaryTest
             {
                 Console.WriteLine("2.71828 is less than 3.14159");
             }
+            (BalTrit[] trits, var remainder) = BalFloat.ConvertDoubleToBalancedTritsWithRemainder(0.125, BalFloat.N_TRITS_SIGNIFICAND);
+            double doub = BalFloat.ConvertBalancedTritsToDouble(trits);
+            Console.WriteLine(doub);
+            (BalTrit[] trits2, var remainder2) = BalFloat.ConvertDoubleToBalancedTritsWithRemainder(doub, BalFloat.N_TRITS_SIGNIFICAND);
+            double doub2 = BalFloat.ConvertBalancedTritsToDouble(trits2);
+            Console.WriteLine(doub2);
 
             var r = new Random();
 
