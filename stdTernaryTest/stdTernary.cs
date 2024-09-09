@@ -5,7 +5,7 @@ using System.Linq;
 namespace stdTernary
 {
 
-    // BalFloat versions of most Math functions, including a log3
+    // BalFloat versions of most Math functions, including a log3 and trit increment/decrement
     public static class TernaryMath
     {
         public static BalFloat Pow(BalFloat balFloat1, BalFloat balFloat2)
@@ -188,8 +188,13 @@ namespace stdTernary
 
     }
 
-    // BALANCED TERNARY TRIT WITH SBYTE AS DATA TYPE FOR -1 , 1, AND 0 VALUES, ALSO WITH TRIT CHARACTER -, +, 0
 
+    /// <summary>
+    /// BALANCED TERNARY TRIT WITH SBYTE AS DATA TYPE FOR -1 , 1, AND 0 VALUES, ALSO WITH TRIT CHARACTER -, +, 0
+    /// Thinking about using two bools or a bool? (three-valued bool with null as a possible value for zero).
+    /// On Stack Overflow the answer seems to be that a bool is no faster than a byte, as the binary computer works in
+    /// multiples of bytes, not on individual bits. Sticking with an sbyte for now.
+    /// </summary>
     public class BalTrit
     {
         private sbyte trit;
@@ -268,6 +273,7 @@ namespace stdTernary
         public static BalTrit operator &(BalTrit trit1, BalTrit trit2) => trit1.AND(trit2);
         public static BalTrit operator |(BalTrit trit1, BalTrit trit2) => trit1.OR(trit2);
         public static BalTrit operator ~(BalTrit trit) => trit.NEG();
+        public static BalTrit operator !(BalTrit trit) => trit.NEG();
         public static BalTrit operator *(BalTrit trit1, BalTrit trit2) => trit1.MULT(trit2);
         public static BalTrit operator +(BalTrit trit1, BalTrit trit2) => trit1.SUM(trit2);
         public static bool operator ==(BalTrit trit1, BalTrit trit2) => trit1.Value == trit2.Value;
@@ -767,7 +773,7 @@ namespace stdTernary
             BalTryte newTryte = 0;
             for (int i = 0; i < N_TRITS_PER_TRYTE; i++)
             {
-                newTryte.Value[i] = ~tryte[i];
+                newTryte.Value[i] = !tryte[i];
             }
             newTryte.SetValue(newTryte.tryte);
             return newTryte;
@@ -777,7 +783,7 @@ namespace stdTernary
         {
             foreach (var trit in tryte)
             {
-                trit.Value = ~trit;
+                trit.Value = !trit;
             }
             SetValue(tryte);
         }
@@ -958,7 +964,7 @@ namespace stdTernary
                 {
                     foreach (var trit in balTrits)
                     {
-                        trit.Value = ~trit;
+                        trit.Value = !trit;
                     }
                 }
                 Array.Reverse(balTrits);    //...and reverse the trit order so greater numbers are on the left
@@ -1371,7 +1377,7 @@ namespace stdTernary
                 {
                     foreach (var trit in balTrits)
                     {
-                        trit.Value = ~trit;
+                        trit.Value = !trit;
                     }
                 }
                 Array.Reverse(balTrits);    //...and reverse the trit order so greater numbers are on the left
