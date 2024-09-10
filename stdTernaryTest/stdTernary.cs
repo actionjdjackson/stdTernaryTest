@@ -286,6 +286,7 @@ namespace stdTernary
         public static bool operator false(BalTrit trit) => trit.Value == -1 || trit.Value == 0;
 
         public static explicit operator bool(BalTrit trit) => trit.trit == 1;
+        public static explicit operator BalTrit(bool b) => b ? new BalTrit(1) : new BalTrit(-1);
         public static implicit operator sbyte(BalTrit trit) => trit.trit;
         public static implicit operator BalTrit(sbyte sb) => (sb <= 1 && sb >= -1) ? new BalTrit(sb) : throw new ArithmeticException("Tried to assign a value too big for BalTrit - keep it to -1, 0, or 1");
         public static implicit operator int(BalTrit trit) => trit.trit;
@@ -1027,6 +1028,9 @@ namespace stdTernary
         public static byte N_TRITS_SIGNIFICAND = (byte)Math.Ceiling((double)N_TRITS_TOTAL * 3 / 4);  //calculates the significand size as 2/3 of the total - may be a bit lean, might try 3/4
         public static byte N_TRITS_EXPONENT = (byte)Math.Floor((double)N_TRITS_TOTAL / 4);    //calculates the exponent size as 1/3 of the total - may be a bit excessive, might try 1/4
         public static byte N_DIGITS_PRECISION = (byte)Math.Abs(Math.Ceiling(Math.Log10(1 / Math.Pow(3, N_TRITS_SIGNIFICAND)))); //how many digits of precision?
+        public static double Epsilon = Math.Pow(3.0, -(Math.Pow(3, N_TRITS_EXPONENT) - 1) / 2) / Math.Pow(3.0, N_TRITS_SIGNIFICAND); //Epsilon value (smallest representable number for the BalFloat)
+        public static double MaxValue = Math.Pow(3.0, (Math.Pow(3, N_TRITS_EXPONENT) - 1) / 2 - 1) * 0.5;
+        public static double MinValue = Math.Pow(3.0, Math.Pow(3, N_TRITS_EXPONENT) - 1) / 2 * -0.5;
 
         private BalTrit[] exponent = new BalTrit[N_TRITS_EXPONENT];
         private BalTrit[] significand = new BalTrit[N_TRITS_SIGNIFICAND];
