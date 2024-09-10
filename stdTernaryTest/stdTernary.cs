@@ -1079,10 +1079,9 @@ namespace stdTernary
             FloatChars = charValue;
         }
 
-
-        public static BalTrit BTCOMPARISON(BalFloat float1, BalFloat float2)
-        {
-            for (int i = 0; i < N_TRITS_EXPONENT; i++)
+        public static BalTrit BTCOMPARISON(BalFloat float1, BalFloat float2)    // returns 0 if equal, 1 if float1 is greater than float2, and -1 if float2 is less than float2
+        {                                                                       // want to use the spaceship operator <=> for it, but C# doesn't support custom operators
+            for (int i = 0; i < N_TRITS_EXPONENT; i++)  
             {
                 if (float1.exponent[i] > float2.exponent[i])
                 {
@@ -1243,17 +1242,17 @@ namespace stdTernary
         public void SetValue(double value)
         {
             this.doubleValue = value;
-            if (value == 0)
+            if (value == 0 || value < BalFloat.Epsilon)
             {
                 SetAllExponentTritsTo(-1);
                 SetAllSignificandTritsTo(0);
             }
-            else if (double.IsPositiveInfinity(value))  //special cases like infinity, neg infinity, NaN/undefined
+            else if (double.IsPositiveInfinity(value) || value > BalFloat.MaxValue)  //special cases like infinity, neg infinity, NaN/undefined
             {
                 SetAllExponentTritsTo(1);
                 SetAllSignificandTritsTo(1);
             }
-            else if (double.IsNegativeInfinity(value))
+            else if (double.IsNegativeInfinity(value) || value < BalFloat.MinValue)
             {
                 SetAllExponentTritsTo(1);
                 SetAllSignificandTritsTo(-1);
@@ -1263,7 +1262,7 @@ namespace stdTernary
                 SetAllExponentTritsTo(1);
                 SetAllSignificandTritsTo(0);
             }
-            else     //real numbers are calculated here
+            else     //real, nonzero numbers are calculated here
             {
                 int exponentValueBase3 = (int)Math.Ceiling((Math.Log(Math.Abs(value)) - Math.Log(0.5)) / Math.Log(3.0));  //calculate the exponent of 3 (magnitude)
                 double significandValue = value / Math.Pow(3.0, exponentValueBase3);    //calculate the significand double value
