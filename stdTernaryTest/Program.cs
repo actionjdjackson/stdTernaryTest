@@ -132,6 +132,11 @@ namespace stdTernaryTest
             BalFloat balFloat2 = -1.2e300;  //testing a very big negative value, less than the MinValue for the BalFloat - should come out at -infinity
             Console.WriteLine(balFloat2.ToString());
 
+            Console.WriteLine(TernaryMath.Tan(TernaryMath.PI / 2)); //testing a NaN value (tangent of pi/2)
+            Console.WriteLine(Math.Tan(Math.PI / 2));
+
+            Console.WriteLine(TernaryMath.ILogT(9.526));
+
             BalInt balInt = 18530201888;
             BalInt balInt2 = 762559748498;
             BalInt sum = balInt + balInt2;
