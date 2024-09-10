@@ -100,7 +100,7 @@ namespace stdTernaryTest
             {
                 var d = r.NextDouble();
                 var d2 = r.NextDouble();
-                var prod = (d * d2);
+                var prod = d * d2;
                 if (prod < 0.1)
                 {
                     Console.Write(".");
@@ -114,7 +114,7 @@ namespace stdTernaryTest
             {
                 var example = new BalFloat(r.NextDouble());
                 var example2 = new BalFloat(r.NextDouble());
-                var prod = (example * example2);
+                var prod = example * example2;
                 if (prod < 0.1)
                 {
                     Console.Write(".");
@@ -122,6 +122,15 @@ namespace stdTernaryTest
             }
             endTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
             Console.WriteLine("\n balfloats multiplication with a comparison check took " + (endTime - startTime) + " ms\n");
+
+            BalFloat balFloat = 1.2e-300;   //testing a very small value, smaller than Epsilon for the BalFloat - should come out zero
+            Console.WriteLine(balFloat.ToString());
+
+            BalFloat balFloat1 = 1.2e300;   //testing a very big value, bigger than the MaxValue for the BaFloat - should come out at infinity
+            Console.WriteLine(balFloat1.ToString());
+
+            BalFloat balFloat2 = -1.2e300;  //testing a very big negative value, less than the MinValue for the BalFloat - should come out at -infinity
+            Console.WriteLine(balFloat2.ToString());
 
             BalInt balInt = 18530201888;
             BalInt balInt2 = 762559748498;

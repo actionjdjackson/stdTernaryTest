@@ -1028,9 +1028,9 @@ namespace stdTernary
         public static byte N_TRITS_SIGNIFICAND = (byte)Math.Ceiling((double)N_TRITS_TOTAL * 3 / 4);  //calculates the significand size as 2/3 of the total - may be a bit lean, might try 3/4
         public static byte N_TRITS_EXPONENT = (byte)Math.Floor((double)N_TRITS_TOTAL / 4);    //calculates the exponent size as 1/3 of the total - may be a bit excessive, might try 1/4
         public static byte N_DIGITS_PRECISION = (byte)Math.Abs(Math.Ceiling(Math.Log10(1 / Math.Pow(3, N_TRITS_SIGNIFICAND)))); //how many digits of precision?
-        public static double Epsilon = Math.Pow(3.0, -(Math.Pow(3, N_TRITS_EXPONENT) - 1) / 2) / Math.Pow(3.0, N_TRITS_SIGNIFICAND); //Epsilon value (smallest representable number for the BalFloat)
-        public static double MaxValue = Math.Pow(3.0, (Math.Pow(3, N_TRITS_EXPONENT) - 1) / 2 - 1) * 0.5;
-        public static double MinValue = Math.Pow(3.0, Math.Pow(3, N_TRITS_EXPONENT) - 1) / 2 * -0.5;
+        public static double Epsilon = Math.Pow(3.0, -(Math.Pow(3.0, N_TRITS_EXPONENT) - 1) / 2) / Math.Pow(3.0, N_TRITS_SIGNIFICAND); //Epsilon value (smallest representable number for the BalFloat)
+        public static double MaxValue = Math.Pow(3.0, (Math.Pow(3.0, N_TRITS_EXPONENT) - 1) / 2 - 1) * 0.5;
+        public static double MinValue = Math.Pow(3.0, (Math.Pow(3.0, N_TRITS_EXPONENT) - 1) / 2) * -0.5;
 
         private BalTrit[] exponent = new BalTrit[N_TRITS_EXPONENT];
         private BalTrit[] significand = new BalTrit[N_TRITS_SIGNIFICAND];
@@ -1242,23 +1242,27 @@ namespace stdTernary
         public void SetValue(double value)
         {
             this.doubleValue = value;
-            if (value == 0 || value < BalFloat.Epsilon)
+            if (value == 0 || Math.Abs(value) < BalFloat.Epsilon)
             {
+                doubleValue = 0;
                 SetAllExponentTritsTo(-1);
                 SetAllSignificandTritsTo(0);
             }
             else if (double.IsPositiveInfinity(value) || value > BalFloat.MaxValue)  //special cases like infinity, neg infinity, NaN/undefined
             {
+                doubleValue = double.PositiveInfinity;
                 SetAllExponentTritsTo(1);
                 SetAllSignificandTritsTo(1);
             }
             else if (double.IsNegativeInfinity(value) || value < BalFloat.MinValue)
             {
+                doubleValue = double.NegativeInfinity;
                 SetAllExponentTritsTo(1);
                 SetAllSignificandTritsTo(-1);
             }
             else if (double.IsNaN(value))
             {
+                doubleValue = double.NaN;
                 SetAllExponentTritsTo(1);
                 SetAllSignificandTritsTo(0);
             }
@@ -1378,7 +1382,7 @@ namespace stdTernary
             {
                 doubleValue = 0;
             }
-            else      //real numbers calculated here
+            else      //real nonzero numbers calculated here
             {
                 double exponentValue = (double)Math.Pow(3, ConvertBalancedTritsToInteger(exponent));  //integer for the exponent
                 double significandValue = ConvertBalancedTritsToDouble(significand);    //and double for the significand
