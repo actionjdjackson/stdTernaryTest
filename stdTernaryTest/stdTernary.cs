@@ -426,8 +426,8 @@ namespace stdTernary
     public class BalTryte
     {
         public static byte N_TRITS_PER_TRYTE = 9;   //can be from 2 - 10 trits
-        public static short MAX_POSITIVE_INTEGER = (short)((Math.Pow(3, N_TRITS_PER_TRYTE) - 1) / 2);
-        public static short MAX_NEGATIVE_INTEGER = (short)-MAX_POSITIVE_INTEGER;
+        public static short MaxValue = (short)((Math.Pow(3, N_TRITS_PER_TRYTE) - 1) / 2);
+        public static short MinValue = (short)-MaxValue;
         private BalTrit[] tryte = new BalTrit[N_TRITS_PER_TRYTE];
         private char[] tryteChars = new char[N_TRITS_PER_TRYTE];
         private short shortValue;
@@ -482,9 +482,9 @@ namespace stdTernary
         public static BalTryte operator +(BalTryte tryte) => new BalTryte(Math.Abs(tryte.shortValue));
         public static BalTryte operator -(BalTryte tryte) => new BalTryte((short)-tryte.shortValue);
         public static implicit operator short(BalTryte tryte) => tryte.shortValue;
-        public static implicit operator BalTryte(short shortValue) => (shortValue <= MAX_POSITIVE_INTEGER && shortValue >= MAX_NEGATIVE_INTEGER) ? new BalTryte(shortValue) : throw new ArithmeticException("Tried to assign to a tryte a short that has a magnitude too big for a tryte of " + N_TRITS_PER_TRYTE + " trits");
+        public static implicit operator BalTryte(short shortValue) => (shortValue <= MaxValue && shortValue >= MinValue) ? new BalTryte(shortValue) : throw new ArithmeticException("Tried to assign to a tryte a short that has a magnitude too big for a tryte of " + N_TRITS_PER_TRYTE + " trits");
         public static implicit operator int(BalTryte tryte) => tryte.shortValue;
-        public static implicit operator BalTryte(int intValue) => (intValue <= MAX_POSITIVE_INTEGER && intValue >= MAX_NEGATIVE_INTEGER) ? new BalTryte((short)intValue) : throw new ArithmeticException("Tried to assign to a tryte an int that has a magnitude too big for a tryte of " + N_TRITS_PER_TRYTE + " trits");
+        public static implicit operator BalTryte(int intValue) => (intValue <= MaxValue && intValue >= MinValue) ? new BalTryte((short)intValue) : throw new ArithmeticException("Tried to assign to a tryte an int that has a magnitude too big for a tryte of " + N_TRITS_PER_TRYTE + " trits");
         public static explicit operator string(BalTryte tryte) => new string(tryte.tryteChars);
         public static explicit operator BalTryte(string str) => (str.Length == N_TRITS_PER_TRYTE) ? new BalTryte(str.ToCharArray()) : throw new ArithmeticException("Conversion from string to BalTryte unsuccessful because the string was the wrong length - should be " + N_TRITS_PER_TRYTE + " trits");
 
@@ -557,7 +557,7 @@ namespace stdTernary
         public BalTryte SUB(BalTryte btryte)
         {
             int temp = this.shortValue - btryte.shortValue;
-            if (temp > MAX_POSITIVE_INTEGER || temp < MAX_NEGATIVE_INTEGER)
+            if (temp > MaxValue || temp < MinValue)
             {
                 throw new OverflowException("Integer subtraction resulted in an overflow - result too big for a tryte with " + N_TRITS_PER_TRYTE + " trits");
             }
@@ -570,7 +570,7 @@ namespace stdTernary
         public BalTryte MULT(BalTryte btryte)
         {
             int temp = this.shortValue * btryte.shortValue;
-            if (temp > MAX_POSITIVE_INTEGER || temp < MAX_NEGATIVE_INTEGER)
+            if (temp > MaxValue || temp < MinValue)
             {
                 throw new OverflowException("Integer multiplication resulted in an overflow - result too big for a tryte with " + N_TRITS_PER_TRYTE + " trits");
             }
@@ -583,7 +583,7 @@ namespace stdTernary
         public BalTryte SUM(BalTryte btryte)
         {
             int temp = this.shortValue + btryte.shortValue;
-            if (temp > MAX_POSITIVE_INTEGER || temp < MAX_NEGATIVE_INTEGER)
+            if (temp > MaxValue || temp < MinValue)
             {
                 throw new OverflowException("Integer addition resulted in an overflow - result too big for a tryte with " + N_TRITS_PER_TRYTE + " trits");
             }
@@ -693,7 +693,7 @@ namespace stdTernary
         {
             shortValue = value;
             short workValue = Math.Abs(value);
-            if (workValue <= MAX_POSITIVE_INTEGER)
+            if (workValue <= MaxValue)
             {
                 byte i = 0;
                 while (workValue != 0)
@@ -770,8 +770,8 @@ namespace stdTernary
     public class BalInt
     {
         public static byte N_TRITS_PER_INT = 27;
-        public static long MAX_POSITIVE_INTEGER = (long)(Math.Pow(3, N_TRITS_PER_INT) - 1) / 2;
-        public static long MAX_NEGATIVE_INTEGER = -MAX_POSITIVE_INTEGER;
+        public static long MaxValue = (long)(Math.Pow(3, N_TRITS_PER_INT) - 1) / 2;
+        public static long MinValue = -MaxValue;
 
         private BalTrit[] balInt = new BalTrit[N_TRITS_PER_INT];
         private char[] integerChars = new char[N_TRITS_PER_INT];
@@ -799,11 +799,11 @@ namespace stdTernary
         public static BalInt operator +(BalInt @int) => new BalInt(Math.Abs(@int.integerValue));
         public static BalInt operator -(BalInt @int) => new BalInt(-@int.integerValue);
         public static implicit operator long(BalInt @int) => @int.integerValue;
-        public static implicit operator BalInt(long @int) => (@int <= MAX_POSITIVE_INTEGER && @int >= MAX_NEGATIVE_INTEGER) ? new BalInt(@int) : throw new ArithmeticException("Converting a long value to a BalInt failed because it was outside the range of the BalInt implementation");
+        public static implicit operator BalInt(long @int) => (@int <= MaxValue && @int >= MinValue) ? new BalInt(@int) : throw new ArithmeticException("Converting a long value to a BalInt failed because it was outside the range of the BalInt implementation");
         public static implicit operator int(BalInt @int) => (@int <= int.MaxValue && @int >= int.MinValue) ? (int)@int.integerValue : throw new ArithmeticException("Converting a BalInt to an int failed because the value was outside the range of the int max/min values");
-        public static implicit operator BalInt(int @int) => (@int <= MAX_POSITIVE_INTEGER && @int >= MAX_NEGATIVE_INTEGER) ? new BalInt(@int) : throw new ArithmeticException("Converting an int value to a BalInt failed because it was outside the range of the BalInt implementation");
+        public static implicit operator BalInt(int @int) => (@int <= MaxValue && @int >= MinValue) ? new BalInt(@int) : throw new ArithmeticException("Converting an int value to a BalInt failed because it was outside the range of the BalInt implementation");
         public static implicit operator short(BalInt @int) => (@int <= short.MaxValue && @int >= short.MinValue) ? (short)@int.integerValue : throw new ArithmeticException("Converting a BalInt to a short failed because the value was outside the range of the short max/min values");
-        public static implicit operator BalInt(short @int) => (@int <= MAX_POSITIVE_INTEGER && @int >= MAX_NEGATIVE_INTEGER) ? new BalInt(@int) : throw new ArithmeticException("Converting a short value to a BalInt failed because it was outside the range of the BalInt implementation");
+        public static implicit operator BalInt(short @int) => (@int <= MaxValue && @int >= MinValue) ? new BalInt(@int) : throw new ArithmeticException("Converting a short value to a BalInt failed because it was outside the range of the BalInt implementation");
         public static explicit operator string(BalInt @int) => new string(@int.integerChars);
         public static explicit operator BalInt(string str) => (str.Length == N_TRITS_PER_INT) ? new BalInt(str.ToCharArray()) : throw new ArithmeticException("Converting a string to a BalInt failed because it wasn't the expected length (" + N_TRITS_PER_INT + " trits)");
         public static explicit operator double(BalInt @int) => @int.integerValue;
@@ -917,7 +917,7 @@ namespace stdTernary
         {
             BalTrit[] balTrits = new BalTrit[N_TRITS_PER_INT];
             long workValue = Math.Abs(intValue);     //easier to work with a positive number...
-            if (workValue <= MAX_POSITIVE_INTEGER)  //make sure the value passed in is within the nTrits passed maximum value
+            if (workValue <= MaxValue)  //make sure the value passed in is within the nTrits passed maximum value
             {
                 byte i = 0;
                 while (workValue != 0)      //easier to start with index 0 - greater numbers on the right
