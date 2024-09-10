@@ -200,6 +200,31 @@ namespace stdTernary
         private sbyte trit;
         private char tritChar;
 
+        public sbyte Value { get => trit; set => SetValue(value); }
+        public char TritChar { get => tritChar; set => SetValue(value); }
+
+        public static BalTrit operator &(BalTrit trit1, BalTrit trit2) => trit1.AND(trit2);
+        public static BalTrit operator |(BalTrit trit1, BalTrit trit2) => trit1.OR(trit2);
+        public static BalTrit operator ~(BalTrit trit) => trit.NEG();
+        public static BalTrit operator !(BalTrit trit) => trit.NEG();
+        public static BalTrit operator *(BalTrit trit1, BalTrit trit2) => trit1.MULT(trit2);
+        public static BalTrit operator +(BalTrit trit1, BalTrit trit2) => trit1.SUM(trit2);
+        public static bool operator ==(BalTrit trit1, BalTrit trit2) => trit1.Value == trit2.Value;
+        public static bool operator !=(BalTrit trit1, BalTrit trit2) => trit1.Value != trit2.Value;
+        public static bool operator >(BalTrit trit1, BalTrit trit2) => trit1.Value > trit2.Value;
+        public static bool operator <(BalTrit trit1, BalTrit trit2) => trit1.Value < trit2.Value;
+        public static bool operator >=(BalTrit trit1, BalTrit trit2) => trit1.Value >= trit2.Value;
+        public static bool operator <=(BalTrit trit1, BalTrit trit2) => trit1.Value <= trit2.Value;
+        public static bool operator true(BalTrit trit) => trit.Value == 1;
+        public static bool operator false(BalTrit trit) => trit.Value == -1 || trit.Value == 0;
+
+        public static explicit operator bool(BalTrit trit) => trit.trit == 1;
+        public static explicit operator BalTrit(bool b) => b ? new BalTrit(1) : new BalTrit(-1);
+        public static implicit operator sbyte(BalTrit trit) => trit.trit;
+        public static implicit operator BalTrit(sbyte sb) => (sb <= 1 && sb >= -1) ? new BalTrit(sb) : throw new ArithmeticException("Tried to assign a value too big for BalTrit - keep it to -1, 0, or 1");
+        public static implicit operator int(BalTrit trit) => trit.trit;
+        public static implicit operator BalTrit(int @int) => (@int <= 1 && @int >= -1) ? new BalTrit((sbyte)@int) : throw new ArithmeticException("Tried to assign a value too big for BalTrit -  keep it to -1, 0, or 1");
+
         public BalTrit()
         {
             Value = 0;
@@ -224,9 +249,6 @@ namespace stdTernary
         {
             return tritChar.ToString() + " which equals " + trit;
         }
-
-        public sbyte Value { get => trit; set => SetValue(value); }
-        public char TritChar { get => tritChar; set => SetValue(value); }
 
         public void SetValue(sbyte value)
         {
@@ -269,28 +291,6 @@ namespace stdTernary
                 throw new ArgumentException("BalTrit SetValue not given a valid ternary character. Should be 0, +, or -.", "charValue");
             }
         }
-
-        public static BalTrit operator &(BalTrit trit1, BalTrit trit2) => trit1.AND(trit2);
-        public static BalTrit operator |(BalTrit trit1, BalTrit trit2) => trit1.OR(trit2);
-        public static BalTrit operator ~(BalTrit trit) => trit.NEG();
-        public static BalTrit operator !(BalTrit trit) => trit.NEG();
-        public static BalTrit operator *(BalTrit trit1, BalTrit trit2) => trit1.MULT(trit2);
-        public static BalTrit operator +(BalTrit trit1, BalTrit trit2) => trit1.SUM(trit2);
-        public static bool operator ==(BalTrit trit1, BalTrit trit2) => trit1.Value == trit2.Value;
-        public static bool operator !=(BalTrit trit1, BalTrit trit2) => trit1.Value != trit2.Value;
-        public static bool operator >(BalTrit trit1, BalTrit trit2) => trit1.Value > trit2.Value;
-        public static bool operator <(BalTrit trit1, BalTrit trit2) => trit1.Value < trit2.Value;
-        public static bool operator >=(BalTrit trit1, BalTrit trit2) => trit1.Value >= trit2.Value;
-        public static bool operator <=(BalTrit trit1, BalTrit trit2) => trit1.Value <= trit2.Value;
-        public static bool operator true(BalTrit trit) => trit.Value == 1;
-        public static bool operator false(BalTrit trit) => trit.Value == -1 || trit.Value == 0;
-
-        public static explicit operator bool(BalTrit trit) => trit.trit == 1;
-        public static explicit operator BalTrit(bool b) => b ? new BalTrit(1) : new BalTrit(-1);
-        public static implicit operator sbyte(BalTrit trit) => trit.trit;
-        public static implicit operator BalTrit(sbyte sb) => (sb <= 1 && sb >= -1) ? new BalTrit(sb) : throw new ArithmeticException("Tried to assign a value too big for BalTrit - keep it to -1, 0, or 1");
-        public static implicit operator int(BalTrit trit) => trit.trit;
-        public static implicit operator BalTrit(int @int) => (@int <= 1 && @int >= -1) ? new BalTrit((sbyte)@int) : throw new ArithmeticException("Tried to assign a value too big for BalTrit -  keep it to -1, 0, or 1");
 
         public BalTrit NEG()
         {
@@ -432,31 +432,6 @@ namespace stdTernary
         private char[] tryteChars = new char[N_TRITS_PER_TRYTE];
         private short shortValue;
 
-        public BalTryte(BalTrit[] value)
-        {
-            Value = value ?? throw new ArgumentNullException(nameof(value), "Null BalTrit[] value passed to BalTryte Constructor");
-        }
-
-        public BalTryte(short shortValue)
-        {
-            ShortValue = shortValue;
-        }
-
-        public BalTryte(char[] tryteChars)
-        {
-            TryteChars = tryteChars;
-        }
-
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
-
-        public override string ToString()
-        {
-            return new string(tryteChars) + " which equals " + shortValue;
-        }
-
         public BalTrit[] Value { get => tryte; set => SetValue(value); }
         public char[] TryteChars { get => tryteChars; set => SetValue(value); }
         public short ShortValue { get => shortValue; set => SetValue(value); }
@@ -487,6 +462,31 @@ namespace stdTernary
         public static implicit operator BalTryte(int intValue) => (intValue <= MaxValue && intValue >= MinValue) ? new BalTryte((short)intValue) : throw new ArithmeticException("Tried to assign to a tryte an int that has a magnitude too big for a tryte of " + N_TRITS_PER_TRYTE + " trits");
         public static explicit operator string(BalTryte tryte) => new string(tryte.tryteChars);
         public static explicit operator BalTryte(string str) => (str.Length == N_TRITS_PER_TRYTE) ? new BalTryte(str.ToCharArray()) : throw new ArithmeticException("Conversion from string to BalTryte unsuccessful because the string was the wrong length - should be " + N_TRITS_PER_TRYTE + " trits");
+
+        public BalTryte(BalTrit[] value)
+        {
+            Value = value ?? throw new ArgumentNullException(nameof(value), "Null BalTrit[] value passed to BalTryte Constructor");
+        }
+
+        public BalTryte(short shortValue)
+        {
+            ShortValue = shortValue;
+        }
+
+        public BalTryte(char[] tryteChars)
+        {
+            TryteChars = tryteChars;
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+
+        public override string ToString()
+        {
+            return new string(tryteChars) + " which equals " + shortValue;
+        }
 
         public BalTryte SHIFTLEFT(int nTrits)
         {
