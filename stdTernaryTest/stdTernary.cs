@@ -517,7 +517,7 @@ namespace stdTernary
             {
                 tryte = value;
                 tryteChars = new char[N_TRITS_PER_TRYTE];
-                var workTrits = value;
+                var workTrits = (BalTrit[]) value.Clone();
                 Array.Reverse(workTrits);
                 short sum = 0;
                 byte exponent = 0;
@@ -589,25 +589,25 @@ namespace stdTernary
             {
                 tryteChars = value;
                 tryte = new BalTrit[N_TRITS_PER_TRYTE];
-                var workChars = value;
+                var workChars = (char[])value.Clone();
                 Array.Reverse(workChars);
                 short sum = 0;
                 short exponent = 0;
                 foreach (var trit in workChars)
                 {
-                    if (trit == '+')
+                    switch (trit)
                     {
-                        sum += (short)Math.Pow(3, exponent);
-                        tryte[exponent] = new BalTrit(1);
-                    }
-                    else if (trit == '-')
-                    {
-                        sum -= (short)Math.Pow(3, exponent);
-                        tryte[exponent] = new BalTrit(-1);
-                    }
-                    else if (trit == '0')
-                    {
-                        tryte[exponent] = new BalTrit(0);
+                        case '+':
+                            sum += (short)Math.Pow(3, exponent);
+                            tryte[exponent] = new BalTrit(1);
+                            break;
+                        case '-':
+                            sum -= (short)Math.Pow(3, exponent);
+                            tryte[exponent] = new BalTrit(-1);
+                            break;
+                        case '0':
+                            tryte[exponent] = new BalTrit(0);
+                            break;
                     }
                     exponent++;
                 }
@@ -632,15 +632,19 @@ namespace stdTernary
 
         public BalTryte SHIFTLEFT(int nTrits)
         {
-            if (nTrits < N_TRITS_PER_TRYTE)
+            if (nTrits <= N_TRITS_PER_TRYTE)
             {
                 var temp = new BalTrit[N_TRITS_PER_TRYTE];
-                Array.Copy(this.tryte, nTrits, temp, 0, N_TRITS_PER_TRYTE - nTrits);
+                //Array.Copy(this.tryte, nTrits, temp, 0, N_TRITS_PER_TRYTE - nTrits);
                 for (int i = 0; i < N_TRITS_PER_TRYTE; i++)
                 {
-                    if (((object)temp[i]) == null)
+                    if (i >= N_TRITS_PER_TRYTE - nTrits)
                     {
                         temp[i] = new BalTrit(0);
+                    }
+                    else
+                    {
+                        temp[i] = tryte[i + nTrits];
                     }
                 }
                 return new BalTryte(temp);
@@ -653,15 +657,19 @@ namespace stdTernary
 
         public BalTryte SHIFTRIGHT(int nTrits)
         {
-            if (nTrits < N_TRITS_PER_TRYTE)
+            if (nTrits <= N_TRITS_PER_TRYTE)
             {
                 var temp = new BalTrit[N_TRITS_PER_TRYTE];
-                Array.Copy(this.tryte, 0, temp, nTrits, N_TRITS_PER_TRYTE - nTrits);
+                //Array.Copy(this.tryte, 0, temp, nTrits, N_TRITS_PER_TRYTE - nTrits);
                 for (int i = 0; i < N_TRITS_PER_TRYTE; i++)
                 {
-                    if (((object)temp[i]) == null)
+                    if (i < nTrits)
                     {
                         temp[i] = new BalTrit(0);
+                    }
+                    else
+                    {
+                        temp[i] = tryte[i - nTrits];
                     }
                 }
                 return new BalTryte(temp);
@@ -776,7 +784,7 @@ namespace stdTernary
             if (value.Length == N_TRITS_PER_TRYTE)
             {
                 tryte = value;
-                var workTrits = value;
+                var workTrits = (BalTrit[]) value.Clone();
                 Array.Reverse(workTrits);
                 short sum = 0;
                 byte exponent = 0;
@@ -787,6 +795,7 @@ namespace stdTernary
                     exponent++;
                 }
                 Array.Reverse(tryteChars);
+                Array.Reverse(tryte);
                 shortValue = sum;
             }
             else
@@ -800,25 +809,25 @@ namespace stdTernary
             if (value.Length == N_TRITS_PER_TRYTE)
             {
                 tryteChars = value;
-                var workChars = value;
+                var workChars = (char[])value.Clone();
                 Array.Reverse(workChars);
                 short sum = 0;
                 short exponent = 0;
                 foreach (var trit in workChars)
                 {
-                    if (trit == '+')
+                    switch (trit)
                     {
-                        sum += (short)Math.Pow(3, exponent);
-                        tryte[exponent] = new BalTrit(1);
-                    }
-                    else if (trit == '-')
-                    {
-                        sum -= (short)Math.Pow(3, exponent);
-                        tryte[exponent] = new BalTrit(-1);
-                    }
-                    else if (trit == '0')
-                    {
-                        tryte[exponent] = new BalTrit(0);
+                        case '+':
+                            sum += (short)Math.Pow(3, exponent);
+                            tryte[exponent] = new BalTrit(1);
+                            break;
+                        case '-':
+                            sum -= (short)Math.Pow(3, exponent);
+                            tryte[exponent] = new BalTrit(-1);
+                            break;
+                        case '0':
+                            tryte[exponent] = new BalTrit(0);
+                            break;
                     }
                     exponent++;
                 }
@@ -949,7 +958,7 @@ namespace stdTernary
         public static implicit operator short(BalInt @int) => (@int <= short.MaxValue && @int >= short.MinValue) ? (short)@int.integerValue : throw new ArithmeticException("Converting a BalInt to a short failed because the value was outside the range of the short max/min values");
         public static implicit operator BalInt(short @int) => (@int <= MaxValue && @int >= MinValue) ? new BalInt(@int) : throw new ArithmeticException("Converting a short value to a BalInt failed because it was outside the range of the BalInt implementation");
         public static explicit operator string(BalInt @int) => new string(@int.integerChars);
-        public static explicit operator BalInt(string str) => (str.Length == N_TRITS_PER_INT) ? new BalInt(str.ToCharArray()) : throw new ArithmeticException("Converting a string to a BalInt failed because it wasn't the expected length (" + N_TRITS_PER_INT + " trits)");
+        public static explicit operator BalInt(string str) => new BalInt(str.ToCharArray());
         public static explicit operator double(BalInt @int) => @int.integerValue;
 
 
@@ -979,21 +988,19 @@ namespace stdTernary
                 balInt = new BalTrit[N_TRITS_PER_INT];
                 for (int i = 0; i < N_TRITS_PER_INT; i++)
                 {
-                    if (value[i] == '+')
+                    switch (value[i])
                     {
-                        balInt[i] = new BalTrit(1);
-                    }
-                    else if (value[i] == '-')
-                    {
-                        balInt[i] = new BalTrit(-1);
-                    }
-                    else if (value[i] == '0')
-                    {
-                        balInt[i] = new BalTrit(0);
-                    }
-                    else
-                    {
-                        throw new ArgumentException("Invalid character encountered in a balanced ternary char array. Please stick to +, -, 0's", "value");
+                        case '+':
+                            balInt[i] = new BalTrit(1);
+                            break;
+                        case '-':
+                            balInt[i] = new BalTrit(-1);
+                            break;
+                        case '0':
+                            balInt[i] = new BalTrit(0);
+                            break;
+                        default:
+                            throw new ArgumentException("Invalid character encountered in a balanced ternary char array. Please stick to +, -, 0's", "value");
                     }
                 }
                 integerValue = ConvertBalancedTritsToInteger(balInt);
@@ -1036,6 +1043,7 @@ namespace stdTernary
             if (value.Length == N_TRITS_PER_INT)
             {
                 balInt = value;
+                integerChars = new char[N_TRITS_PER_INT];
                 integerValue = ConvertBalancedTritsToInteger(value);
                 for (int i = 0; i < N_TRITS_PER_INT; i++)
                 {
@@ -1065,21 +1073,19 @@ namespace stdTernary
                 integerChars = value;
                 for (int i = 0; i < N_TRITS_PER_INT; i++)
                 {
-                    if (value[i] == '+')
+                    switch (value[i])
                     {
-                        balInt[i] = new BalTrit(1);
-                    }
-                    else if (value[i] == '-')
-                    {
-                        balInt[i] = new BalTrit(-1);
-                    }
-                    else if (value[i] == '0')
-                    {
-                        balInt[i] = new BalTrit(0);
-                    }
-                    else
-                    {
-                        throw new ArgumentException("Invalid character encountered in a balanced ternary char array. Please stick to +, -, 0's", "value");
+                        case '+':
+                            balInt[i] = new BalTrit(1);
+                            break;
+                        case '-':
+                            balInt[i] = new BalTrit(-1);
+                            break;
+                        case '0':
+                            balInt[i] = new BalTrit(0);
+                            break;
+                        default:
+                            throw new ArgumentException("Invalid character encountered in a balanced ternary char array. Please stick to +, -, 0's", "value");
                     }
                 }
                 integerValue = ConvertBalancedTritsToInteger(balInt);
@@ -1090,15 +1096,15 @@ namespace stdTernary
             }
         }
 
-        public static int ConvertBalancedTritsToInteger(BalTrit[] balTrits)
-        {
-            var workTrits = balTrits;
+        public static long ConvertBalancedTritsToInteger(BalTrit[] balTrits)
+         {
+            BalTrit[] workTrits = (BalTrit[]) balTrits.Clone();
             Array.Reverse(workTrits);   //easier to work with the array of trits reversed
-            int sum = 0;
+            long sum = 0;
             short exponent = 0;
             foreach (var trit in workTrits)
             {
-                sum += (int)(trit.Value * Math.Pow(3, exponent));   //exponent increases as the invisible index increases, and adds to the sum if the trit is -1 or 1
+                sum += (long)(trit.Value * Math.Pow(3, exponent));   //exponent increases as the invisible index increases, and adds to the sum if the trit is -1 or 1
                 exponent++;
             }
             return sum;
@@ -1169,12 +1175,16 @@ namespace stdTernary
             if (nTrits < N_TRITS_PER_INT)
             {
                 var temp = new BalTrit[N_TRITS_PER_INT];
-                Array.Copy(this.balInt, nTrits, temp, 0, N_TRITS_PER_INT - nTrits);
+                //Array.Copy(this.balInt, nTrits, temp, 0, N_TRITS_PER_INT - nTrits);
                 for (int i = 0; i < N_TRITS_PER_INT; i++)
                 {
-                    if (((object)temp[i]) == null)
+                    if (i >= N_TRITS_PER_INT - nTrits)
                     {
                         temp[i] = new BalTrit(0);
+                    }
+                    else
+                    {
+                        temp[i] = balInt[i + nTrits];
                     }
                 }
                 return new BalInt(temp);
@@ -1193,9 +1203,13 @@ namespace stdTernary
                 Array.Copy(this.balInt, 0, temp, nTrits, N_TRITS_PER_INT - nTrits);
                 for (int i = 0; i < N_TRITS_PER_INT; i++)
                 {
-                    if (((object)temp[i]) == null)
+                    if (i < nTrits)
                     {
                         temp[i] = new BalTrit(0);
+                    }
+                    else
+                    {
+                        temp[i] = balInt[i - nTrits];
                     }
                 }
                 return new BalInt(temp);
@@ -1398,21 +1412,19 @@ namespace stdTernary
                 significand = new BalTrit[N_TRITS_SIGNIFICAND];
                 for (byte i = 0; i < N_TRITS_EXPONENT; i++)
                 {
-                    if (value[i] == '+')
+                    switch (value[i])
                     {
-                        exponent[i] = new BalTrit(1);
-                    }
-                    else if (value[i] == '-')
-                    {
-                        exponent[i] = new BalTrit(-1);
-                    }
-                    else if (value[i] == '0')
-                    {
-                        exponent[i] = new BalTrit(0);
-                    }
-                    else
-                    {
-                        throw new ArgumentException("Invalid character in ternary char array passed to SetValue.", "value");
+                        case '+':
+                            exponent[i] = new BalTrit(1);
+                            break;
+                        case '-':
+                            exponent[i] = new BalTrit(-1);
+                            break;
+                        case '0':
+                            exponent[i] = new BalTrit(0);
+                            break;
+                        default:
+                            throw new ArgumentException("Invalid character in ternary char array passed to SetValue.", "value");
                     }
                 }
                 for (byte i = N_TRITS_EXPONENT; i < N_TRITS_TOTAL; i++)
@@ -1830,7 +1842,7 @@ namespace stdTernary
 
         public static int ConvertBalancedTritsToInteger(BalTrit[] balTrits)
         {
-            var workTrits = balTrits;
+            var workTrits = (BalTrit[])balTrits.Clone();
             Array.Reverse(workTrits);   //easier to work with the array of trits reversed
             int sum = 0;
             short exponent = 0;
