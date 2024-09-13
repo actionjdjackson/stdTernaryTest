@@ -11,19 +11,20 @@ namespace stdTernaryTest
         static void Main(string[] args)
         {
 
-            var summary = BenchmarkRunner.Run<Benchmarks>();
+            //var summary = BenchmarkRunner.Run<Benchmarks>();
 
             //Below is a variety of tests for the stdTernary library. Uncomment whatever interests you. Many were used in debugging.
 
-            //BalTryte fromstring = (BalTryte)"0++0--+0+";
-            //string tostring = (string)new BalTryte(2818);
+            //BalInt fromstring = (BalInt)"000000000000000000000000000";
+            //fromstring.IntegerValue = 2818;
+            //string tostring = (string)new BalInt(2818);
             //Console.WriteLine(fromstring.ToString());
             //Console.WriteLine(tostring);
 
-            //BalTryte bal = 100;
-            //var newbal = bal << 9;
-            //var finalbal = new BalTryte(newbal.Value);
-            //Console.WriteLine(bal.ToString() + "\n" + newbal.ToString() + "\n" + finalbal.ToString());
+            BalFloat bal = 1.3340057668999e-10;     //some rounding error depending on whether we round to the nearest 10th or 11th digit (ceiling or floor in precision calculation)
+            var newbal = -bal;                      //checking the negative
+            var finalbal = new BalFloat(newbal.Value);  //when we convert back from ternary it's off on the 11th digit by one, other times it's right on
+            Console.WriteLine(bal.ToString() + "\n" + newbal.ToString() + "\n" + finalbal.ToString());
             //Console.WriteLine(bal.Value[0] + " " + bal.Value[1] + " " + bal.Value[2] + " " + bal.Value[3] + " " + bal.Value[4]);
             //Console.WriteLine(newbal.Value[0] + " " + newbal.Value[1] + " " + newbal.Value[2] + " " + newbal.Value[3] + " " + newbal.Value[4]);
             //Console.WriteLine(finalbal.Value[0] + " " + finalbal.Value[1] + " " + finalbal.Value[2] + " " + finalbal.Value[3] + " " + finalbal.Value[4]);
@@ -64,8 +65,8 @@ namespace stdTernaryTest
             //whateverelse.InvertSelf();      //inversion of self
             //Console.WriteLine(whateverelse.ToString()); //ToString() gives the char string of +/-/0 of the BalTryte as well as the decimal equivalent
 
-            //Console.WriteLine(anotherone);  //implicit casting causes WriteLine to write the decimal equivalent of a BalTryte
-            //Console.WriteLine(anotherone.Invert()); //inversion is also outputted as a decimal equivalent
+            //Console.WriteLine(anotherone);  //can pass a BalTryte directly to WriteLine and will give both the char string and decimal
+            //Console.WriteLine(anotherone.Invert()); //inversion is also outputted the same way to WriteLine
 
             //var startTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
             //Console.WriteLine(startFloat.ToString());
@@ -186,33 +187,13 @@ namespace stdTernaryTest
         int nIterations = 10000;
 
         [Benchmark]
-        public void RandomAssignmentToBalFloat()
-        {
-            var r = new Random();
-            for (int i = 0; i < nIterations; i++)
-            {
-                BalFloat balFloat = r.NextDouble();
-            }
-        }
-
-        [Benchmark]
-        public void RandomAssignmentToDouble()
-        {
-            var r = new Random();
-            for (int i = 0; i < nIterations; i++)
-            {
-                Double binFloat = r.NextDouble();
-            }
-        }
-
-        [Benchmark]
         public void RandomAssignmentToBalIntAndTritShift()
         {
             var r = new Random();
             for (int i = 0; i < nIterations; i++)
             {
                 BalInt balInt = r.Next();
-                BalInt balInt1 = balInt << 13;
+                BalInt balInt1 = balInt << 16;
             }
         }
 

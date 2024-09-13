@@ -239,10 +239,6 @@ namespace stdTernary
         public static implicit operator int(BalTrit trit) => trit.trit;
         public static implicit operator BalTrit(int @int) => (@int <= 1 && @int >= -1) ? new BalTrit((sbyte)@int) : throw new ArithmeticException("Tried to assign a value too big for BalTrit -  keep it to -1, 0, or 1");
 
-        //public BalTrit()
-        //{
-        //    Value = 0;
-        //}
 
         public BalTrit(sbyte value)
         {
@@ -465,7 +461,7 @@ namespace stdTernary
 
 
     /// <summary>
-    /// A customizable Balanced Ternary tryte data type/class with a range of 2 - 10 trits per tryte. Bytewise operators have been overridden
+    /// A customizable Balanced Ternary tryte data type/struct with a range of 2 - 10 trits per tryte. Bytewise operators have been overridden
     /// for everything except ^ (XOR) - which is a specifically binary operation. I might use ^ for XNOR/MULTIPLY but not sure. There is a
     /// BTCOMPARISON method which is for the <=> spaceship operator - but C# doesn't allow custom operators.
     /// </summary>
@@ -509,7 +505,7 @@ namespace stdTernary
         public static implicit operator int(BalTryte tryte) => tryte.shortValue;
         public static implicit operator BalTryte(int intValue) => (intValue <= MaxValue && intValue >= MinValue) ? new BalTryte((short)intValue) : throw new ArithmeticException("Tried to assign to a tryte an int that has a magnitude too big for a tryte of " + N_TRITS_PER_TRYTE + " trits");
         public static explicit operator string(BalTryte tryte) => new string(tryte.tryteChars);
-        public static explicit operator BalTryte(string str) => (str.Length == N_TRITS_PER_TRYTE) ? new BalTryte(str.ToCharArray()) : throw new ArithmeticException("Conversion from string to BalTryte unsuccessful because the string was the wrong length - should be " + N_TRITS_PER_TRYTE + " trits");
+        public static explicit operator BalTryte(string str) => new BalTryte(str.ToCharArray());
 
         public BalTryte(BalTrit[] value)
         {
@@ -915,7 +911,7 @@ namespace stdTernary
     }
 
     /// <summary>
-    /// The BalInt class is a modifiable general purpose Balanced Ternary integer, with an array of trits, chars, and a long for the values it holds.
+    /// The BalInt struct is a modifiable general purpose Balanced Ternary integer, with an array of trits, chars, and a long for the values it holds.
     /// All the math is done in binary and converted to ternary. Trit-shifting is done in Ternary. Can be explicitly cast to a string of +, -, 0's
     /// </summary>
     public struct BalInt
@@ -1224,27 +1220,45 @@ namespace stdTernary
 
 
     /// <summary>
-    /// The BalFloat class is a modifiable general purpose Balanced Ternary floating point number with trits, chars, and a double. Might get rid of the chars because
-    /// it slows things down, but it's intended for interoperability with my Action Ternary Simulator project, which uses strings of +/-/0's
+    /// The BalFloat struct is a modifiable general purpose Balanced Ternary floating point number with trits, chars, and a double. Might get rid of the chars because
+    /// it slows things down, but it's intended for interoperability with my Action Ternary Simulator project, which uses strings of +/-/0's. Can be customized
+    /// by changing the N_TRITS_TOTAL static parameter, and the fractions in the N_TRITS_SIGNIFICAND and N_TRITS_EXPONENT static parameters.
     /// </summary>
     public struct BalFloat
     {
-        public static byte N_TRITS_TOTAL = 27;  //here is where you can specify what number of trits you want to use for the BalFloat
-        public static byte N_TRITS_SIGNIFICAND = (byte)Math.Ceiling((double)N_TRITS_TOTAL * 3 / 4);  //calculates the significand size as 2/3 of the total - may be a bit lean, might try 3/4
-        public static byte N_TRITS_EXPONENT = (byte)Math.Floor((double)N_TRITS_TOTAL / 4);    //calculates the exponent size as 1/3 of the total - may be a bit excessive, might try 1/4
-        public static byte N_DIGITS_PRECISION = (byte)Math.Abs(Math.Ceiling(Math.Log10(1 / Math.Pow(3, N_TRITS_SIGNIFICAND)))); //how many digits of precision?
-        public static double Epsilon = Math.Pow(3, -(Math.Pow(3, N_TRITS_EXPONENT) - 1) / 2) / Math.Pow(3, N_TRITS_SIGNIFICAND); //Epsilon value (smallest representable number for the BalFloat)
+        /// <summary>
+        /// The total number of trits used by the BalFloat - 27 is a nice number
+        /// </summary>
+        public static byte N_TRITS_TOTAL = 27;
+        /// <summary>
+        /// The number of trits used for the significand in the BalFloat - the precision. Currently set to 3/4 of the total trits rounded up.
+        /// </summary>
+        public static byte N_TRITS_SIGNIFICAND = (byte)Math.Ceiling((double)N_TRITS_TOTAL * 3 / 4);
+        /// <summary>
+        /// The number of trits used for the exponent in the BalFloat - the magnitude. Currently set to 1/4 of the total trits rounded down.
+        /// </summary>
+        public static byte N_TRITS_EXPONENT = (byte)Math.Floor((double)N_TRITS_TOTAL / 4);
+        /// <summary>
+        /// The calculated number of digits of precision with a given N_TRITS_SIGNIFICAND
+        /// </summary>
+        public static byte N_DIGITS_PRECISION = (byte)Math.Abs(Math.Floor(Math.Log10(1 / Math.Pow(3, N_TRITS_SIGNIFICAND))));
+        /// <summary>
+        /// The smallest representable value for the BalFloat
+        /// </summary>
+        public static double Epsilon = Math.Pow(3, -(Math.Pow(3, N_TRITS_EXPONENT) - 1) / 2) / Math.Pow(3, N_TRITS_SIGNIFICAND);
+        /// <summary>
+        /// The maximum representable value for the BalFloat
+        /// </summary>
         public static double MaxValue = Math.Pow(3, (Math.Pow(3, N_TRITS_EXPONENT) - 1) / 2 - 1) * 0.5;
+        /// <summary>
+        /// The minimum (negative) value representable for the BalFloat
+        /// </summary>
         public static double MinValue = Math.Pow(3, (Math.Pow(3, N_TRITS_EXPONENT) - 1) / 2) * -0.5;
 
-        //private BalTrit[] exponent = new BalTrit[N_TRITS_EXPONENT];
-        //private BalTrit[] significand = new BalTrit[N_TRITS_SIGNIFICAND];
-        //private BalTrit[] wholeBalFloat = new BalTrit[N_TRITS_TOTAL];
         private BalTrit[] exponent;
         private BalTrit[] significand;
         private BalTrit[] wholeBalFloat;
         private double doubleValue;
-        //private char[] floatChars = new char[N_TRITS_TOTAL];
         private char[] floatChars;
 
         public double DoubleValue { get => doubleValue; set => SetValue(value); }   //when we modify the three value types, they are calling the appropriate SetValue function for that type
@@ -1270,10 +1284,13 @@ namespace stdTernary
         public static implicit operator double(BalFloat @float) => @float.DoubleValue;
         public static implicit operator BalFloat(double doubleVal) => new BalFloat(doubleVal);
         public static explicit operator string(BalFloat @float) => new string(@float.floatChars);
-        public static explicit operator BalFloat(string str) => (str.Length == N_TRITS_TOTAL) ? new BalFloat(str.ToCharArray()) : throw new ArithmeticException("Conversion from string to BalFloat unsuccessful because the string was not the expected length.");
+        public static explicit operator BalFloat(string str) => new BalFloat(str.ToCharArray());
 
-
-        public BalFloat(double value)     //constructor calls the double property
+        /// <summary>
+        /// Constructor for BalFloat struct, passing in a double as the value to be converted to Ternary
+        /// </summary>
+        /// <param name="value">The double value to be converted to Ternary</param>
+        public BalFloat(double value)
         {
             wholeBalFloat = new BalTrit[N_TRITS_TOTAL];
             exponent = new BalTrit[N_TRITS_EXPONENT];
@@ -1305,23 +1322,24 @@ namespace stdTernary
             }
             else     //real, nonzero numbers are calculated here
             {
-                this.doubleValue = value;
-                int exponentValueBase3 = (int)Math.Ceiling((Math.Log(Math.Abs(value)) - Math.Log(0.5)) / Math.Log(3));  //calculate the exponent of 3 (magnitude)
-                double significandValue = value / Math.Pow(3, exponentValueBase3);    //calculate the significand double value
+                //this.doubleValue = value;
+                doubleValue = RoundToNearestDigitOfPrecision(value);
+                int exponentValueBase3 = (int)Math.Ceiling((Math.Log(Math.Abs(doubleValue)) - Math.Log(0.5)) / Math.Log(3));  //calculate the exponent of 3 (magnitude)
+                double significandValue = doubleValue / Math.Pow(3, exponentValueBase3);    //calculate the significand double value
                 double remainder;   //remainder is how much is left after coverting to balanced ternary
-                (this.significand, remainder) = ConvertDoubleToBalancedTritsWithRemainder(significandValue, N_TRITS_SIGNIFICAND); //significand in ternary floating point
-                this.exponent = ConvertIntegerToBalancedTrits(exponentValueBase3, N_TRITS_EXPONENT);    //exponent in ternary integer
+                (significand, remainder) = ConvertDoubleToBalancedTritsWithRemainder(significandValue, N_TRITS_SIGNIFICAND); //significand in ternary floating point
+                exponent = ConvertIntegerToBalancedTrits(exponentValueBase3, N_TRITS_EXPONENT);    //exponent in ternary integer
                 wholeBalFloat = new BalTrit[N_TRITS_TOTAL];
                 floatChars = new char[N_TRITS_TOTAL];
                 for (byte i = 0; i < N_TRITS_EXPONENT; i++) //takes the exponent and significand (below) and puts them together into the whole balanced float, including chars +/-/0
                 {
-                    this.wholeBalFloat[i] = exponent[i];
-                    this.floatChars[i] = exponent[i].TritChar;
+                    wholeBalFloat[i] = exponent[i];
+                    floatChars[i] = exponent[i].TritChar;
                 }
-                for (int i = N_TRITS_EXPONENT; i < N_TRITS_TOTAL; i++)  // continues here with significand
+                for (byte i = N_TRITS_EXPONENT; i < N_TRITS_TOTAL; i++)  // continues here with significand
                 {
-                    this.wholeBalFloat[i] = significand[i - N_TRITS_EXPONENT];
-                    this.floatChars[i] = significand[i - N_TRITS_EXPONENT].TritChar;
+                    wholeBalFloat[i] = significand[i - N_TRITS_EXPONENT];
+                    floatChars[i] = significand[i - N_TRITS_EXPONENT].TritChar;
                 }
             }
         }
@@ -1342,15 +1360,19 @@ namespace stdTernary
             {
                 wholeBalFloat[i] = new BalTrit(t);
                 exponent[i] = new BalTrit(t);
-                floatChars[i] = exponent[i].TritChar;
+                floatChars[i] = wholeBalFloat[i].TritChar;
             }
         }
 
-        public BalFloat(BalTrit[] value)    //constructor calls the BalTrit[] property
+        /// <summary>
+        /// Constructor for the BalFloat taking an array of BalTrits to be converted to binary
+        /// </summary>
+        /// <param name="value">The array of BalTrits to pass into the constructor</param>
+        public BalFloat(BalTrit[] value)
         {
             if (value.Length == N_TRITS_TOTAL)
             {
-                this.wholeBalFloat = value;
+                wholeBalFloat = value;
                 exponent = new BalTrit[N_TRITS_EXPONENT];
                 significand = new BalTrit[N_TRITS_SIGNIFICAND];
                 floatChars = new char[N_TRITS_TOTAL];
@@ -1390,9 +1412,10 @@ namespace stdTernary
                 }
                 else      //real nonzero numbers calculated here
                 {
-                    double exponentValue = (double)Math.Pow(3, ConvertBalancedTritsToInteger(exponent));  //integer for the exponent
+                    double exponentValue = (double)Math.Pow(3, ConvertBalancedTritsToInteger(exponent));  //double for the exponent
                     double significandValue = ConvertBalancedTritsToDouble(significand);    //and double for the significand
                     doubleValue = significandValue * exponentValue; // multiply them together to get the final value
+                    doubleValue = RoundToNearestDigitOfPrecision(doubleValue);  //round to nearest digit of precision
                 }
 
             }
@@ -1402,7 +1425,11 @@ namespace stdTernary
             }
         }
 
-        public BalFloat(char[] value)   //constructor calls the char[] property
+        /// <summary>
+        /// A constructor passing in an array of chars and converting to trits and a double
+        /// </summary>
+        /// <param name="value">Character Array representing Balanced Ternary</param>
+        public BalFloat(char[] value)
         {
             if (value.Length == N_TRITS_TOTAL)
             {
@@ -1475,6 +1502,7 @@ namespace stdTernary
                     double exponentValue = (double)Math.Pow(3, ConvertBalancedTritsToInteger(exponent));  //integer for the exponent
                     double significandValue = ConvertBalancedTritsToDouble(significand);    //and double for the significand
                     doubleValue = significandValue * exponentValue; // multiply them together to get the final value
+                    doubleValue = RoundToNearestDigitOfPrecision(doubleValue);
                 }
 
             }
@@ -1484,8 +1512,61 @@ namespace stdTernary
             }
         }
 
-        public static BalTrit BTCOMPARISON(BalFloat float1, BalFloat float2)    // returns 0 if equal, 1 if float1 is greater than float2, and -1 if float2 is less than float2
-        {                                                                       // want to use the spaceship operator <=> for it, but C# doesn't support custom operators
+        /// <summary>
+        /// Rounds to the nearest digit of precision as calculated in the static member N_DIGITS_PRECISION.
+        /// If it's a whole number, it returns the whole number. If it's in scientific notation, it returns
+        /// a rounded version, and if it's a floating point number not in scientific notation, it rounds
+        /// to the nearest digit of precision including the digits before the floating point.
+        /// </summary>
+        /// <param name="doubleValue"></param>
+        /// <returns>The double value of the rounded floating point number</returns>
+        public static double RoundToNearestDigitOfPrecision(double doubleValue)
+        {
+            var doubleString = doubleValue.ToString();
+            if (doubleString.Contains('E'))
+            {
+                var sigsplit = doubleString.Split('E');
+                var significand = double.Parse(sigsplit[0]);
+                significand = Math.Round(significand, N_DIGITS_PRECISION - 1);
+                return significand * Math.Pow(10, int.Parse(sigsplit[1]));
+            }
+            else
+            {
+                doubleString = Math.Abs(doubleValue).ToString();
+                if (doubleString.Contains('.'))
+                {
+                    var splitString = doubleString.Split('.');
+                    var split = splitString[0];
+                    if (split == "0")
+                    {
+                        return Math.Round(doubleValue, N_DIGITS_PRECISION);
+                    }
+                    else if (split.Length <= N_DIGITS_PRECISION)
+                    {
+                        return Math.Round(doubleValue, N_DIGITS_PRECISION - split.Length);
+                    }
+                    else
+                    {
+                        return Math.Round(doubleValue, 0);
+                    }
+                }
+                else
+                {
+                    return doubleValue;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Balanced Ternary Comparison Operator - supposed to be used with the spaceship operator <=> but C# doesn't support custom operators at this time.
+        /// Returns 0 if the two floats are equal, 1 if the first float is larger, and -1 if the first float is smaller. Checks the exponent first, then
+        /// the significand.
+        /// </summary>
+        /// <param name="float1"></param>
+        /// <param name="float2"></param>
+        /// <returns>A BalTrit with value of 1, -1, or 0</returns>
+        public static BalTrit BTCOMPARISON (BalFloat float1, BalFloat float2)    
+        {                                                                       
             for (int i = 0; i < N_TRITS_EXPONENT; i++)  
             {
                 if (float1.exponent[i] > float2.exponent[i])
@@ -1646,7 +1727,6 @@ namespace stdTernary
 
         public void SetValue(double value)
         {
-            this.doubleValue = value;
             if (value == 0 || Math.Abs(value) < BalFloat.Epsilon)
             {
                 doubleValue = 0;
@@ -1673,20 +1753,21 @@ namespace stdTernary
             }
             else     //real, nonzero numbers are calculated here
             {
-                int exponentValueBase3 = (int)Math.Ceiling((Math.Log(Math.Abs(value)) - Math.Log(0.5)) / Math.Log(3));  //calculate the exponent of 3 (magnitude)
-                double significandValue = value / Math.Pow(3, exponentValueBase3);    //calculate the significand double value
+                this.doubleValue = RoundToNearestDigitOfPrecision(value);
+                int exponentValueBase3 = (int)Math.Ceiling((Math.Log(Math.Abs(doubleValue)) - Math.Log(0.5)) / Math.Log(3));  //calculate the exponent of 3 (magnitude)
+                double significandValue = doubleValue / Math.Pow(3, exponentValueBase3);    //calculate the significand double value
                 double remainder;   //remainder is how much is left after coverting to balanced ternary
-                (this.significand, remainder) = ConvertDoubleToBalancedTritsWithRemainder(significandValue, N_TRITS_SIGNIFICAND); //significand in ternary floating point
-                this.exponent = ConvertIntegerToBalancedTrits(exponentValueBase3, N_TRITS_EXPONENT);    //exponent in ternary integer
+                (significand, remainder) = ConvertDoubleToBalancedTritsWithRemainder(significandValue, N_TRITS_SIGNIFICAND); //significand in ternary floating point
+                exponent = ConvertIntegerToBalancedTrits(exponentValueBase3, N_TRITS_EXPONENT);    //exponent in ternary integer
                 for (byte i = 0; i < N_TRITS_EXPONENT; i++) //takes the exponent and significand (below) and puts them together into the whole balanced float, including chars +/-/0
                 {
-                    this.wholeBalFloat[i] = exponent[i];
-                    this.floatChars[i] = exponent[i].TritChar;
+                    wholeBalFloat[i] = exponent[i];
+                    floatChars[i] = exponent[i].TritChar;
                 }
-                for (int i = N_TRITS_EXPONENT; i < N_TRITS_TOTAL; i++)  // continues here with significand
+                for (byte i = N_TRITS_EXPONENT; i < N_TRITS_TOTAL; i++)  // continues here with significand
                 {
-                    this.wholeBalFloat[i] = significand[i - N_TRITS_EXPONENT];
-                    this.floatChars[i] = significand[i - N_TRITS_EXPONENT].TritChar;
+                    wholeBalFloat[i] = significand[i - N_TRITS_EXPONENT];
+                    floatChars[i] = significand[i - N_TRITS_EXPONENT].TritChar;
                 }
             }
         }
@@ -1765,7 +1846,11 @@ namespace stdTernary
             }
         }
 
-
+        /// <summary>
+        /// Creates a double value based on the exponent and significand and puts it in the doubleValue struct member.
+        /// Takes into account special values like infinities and NaNs, and does so without needing to know how many
+        /// total trits are involved - uses LINQ's All function.
+        /// </summary>
         private void CreateDoubleValueIncludingSpecialCases()
         {
             if (exponent.All(t => t.Value == 1))    //infinities and NaNs here
@@ -1792,6 +1877,7 @@ namespace stdTernary
                 double exponentValue = (double)Math.Pow(3, ConvertBalancedTritsToInteger(exponent));  //integer for the exponent
                 double significandValue = ConvertBalancedTritsToDouble(significand);    //and double for the significand
                 doubleValue = significandValue * exponentValue; // multiply them together to get the final value
+                doubleValue = RoundToNearestDigitOfPrecision(doubleValue);
             }
         }
 
