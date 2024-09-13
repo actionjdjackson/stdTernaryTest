@@ -15,16 +15,18 @@ namespace stdTernaryTest
 
             //Below is a variety of tests for the stdTernary library. Uncomment whatever interests you. Many were used in debugging.
 
-            //BalInt fromstring = (BalInt)"000000000000000000000000000";
-            //fromstring.IntegerValue = 2818;
-            //string tostring = (string)new BalInt(2818);
+            //BalTryte fromstring = (BalTryte)"+-++0+0-0";
+            //BalTryte fromtrits = new BalTryte(fromstring.Value);
+            //fromstring.TryteChars = "+-++0+0-0".ToCharArray();
+            //string tostring = (string)new BalTryte(5370);
             //Console.WriteLine(fromstring.ToString());
+            //Console.WriteLine(fromtrits.ToString());
             //Console.WriteLine(tostring);
 
-            BalFloat bal = 1.3340057668999e-10;     //some rounding error depending on whether we round to the nearest 10th or 11th digit (ceiling or floor in precision calculation)
-            var newbal = -bal;                      //checking the negative
-            var finalbal = new BalFloat(newbal.Value);  //when we convert back from ternary it's off on the 11th digit by one, other times it's right on
-            Console.WriteLine(bal.ToString() + "\n" + newbal.ToString() + "\n" + finalbal.ToString());
+            //BalFloat bal = 1.3340057668999e-10;     //some rounding error depending on whether we round to the nearest 10th or 11th digit (ceiling or floor in precision calculation)
+            //var newbal = -bal;                      //checking the negative
+            //var finalbal = new BalFloat(newbal.Value);  //when we convert back from ternary it's off on the 11th digit by one, other times it's right on
+            //Console.WriteLine(bal.ToString() + "\n" + newbal.ToString() + "\n" + finalbal.ToString());
             //Console.WriteLine(bal.Value[0] + " " + bal.Value[1] + " " + bal.Value[2] + " " + bal.Value[3] + " " + bal.Value[4]);
             //Console.WriteLine(newbal.Value[0] + " " + newbal.Value[1] + " " + newbal.Value[2] + " " + newbal.Value[3] + " " + newbal.Value[4]);
             //Console.WriteLine(finalbal.Value[0] + " " + finalbal.Value[1] + " " + finalbal.Value[2] + " " + finalbal.Value[3] + " " + finalbal.Value[4]);
