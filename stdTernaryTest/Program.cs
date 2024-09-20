@@ -11,21 +11,23 @@ namespace stdTernaryTest
         static void Main(string[] args)
         {
 
-            //var summary = BenchmarkRunner.Run<Benchmarks>();
+            var summary = BenchmarkRunner.Run<Benchmarks>();
 
             //Below is a variety of tests for the stdTernary library. Uncomment whatever interests you. Many were used in debugging.
 
-            //BalTryte fromstring = (BalTryte)"+-++0+0-0";
-            //BalTryte fromtrits = new BalTryte(fromstring.Value);
-            //fromstring.TryteChars = "+-++0+0-0".ToCharArray();
-            //string tostring = (string)new BalTryte(5370);
+            //BalFloat fromstring = (BalFloat)"--++00-00++-+0--+-000-++0-0";
+            //BalFloat fromtrits = new BalFloat(fromstring.Value);
+            //fromstring.FloatChars = "--++00-00++-+0--+-000-++0-0".ToCharArray();
+            //string tostring = (string)new BalFloat(-1.2339629040E-138);
+            //BalFloat fromnumber = new BalFloat(-1.2339629040E-138);
             //Console.WriteLine(fromstring.ToString());
             //Console.WriteLine(fromtrits.ToString());
             //Console.WriteLine(tostring);
+            //Console.WriteLine(fromnumber.ToString());
 
             //BalFloat bal = 1.3340057668999e-10;     //some rounding error depending on whether we round to the nearest 10th or 11th digit (ceiling or floor in precision calculation)
             //var newbal = -bal;                      //checking the negative
-            //var finalbal = new BalFloat(newbal.Value);  //when we convert back from ternary it's off on the 11th digit by one, other times it's right on
+            //var finalbal = new BalFloat(newbal.Value);  //when we convert back from ternary it's off on the 11th digit by one to three, other times it's right on
             //Console.WriteLine(bal.ToString() + "\n" + newbal.ToString() + "\n" + finalbal.ToString());
             //Console.WriteLine(bal.Value[0] + " " + bal.Value[1] + " " + bal.Value[2] + " " + bal.Value[3] + " " + bal.Value[4]);
             //Console.WriteLine(newbal.Value[0] + " " + newbal.Value[1] + " " + newbal.Value[2] + " " + newbal.Value[3] + " " + newbal.Value[4]);
@@ -183,33 +185,60 @@ namespace stdTernaryTest
         }
     }
 
+
+    /// <summary>
+    /// Benchmarks Class for running tests on stdTernary.cs
+    /// </summary>
     [MemoryDiagnoser]
     public class Benchmarks
     {
         int nIterations = 10000;
 
+        //[Benchmark]
+        //public void RandomAssignmentToBalIntAndTritShift()
+        //{
+        //    var r = new Random();
+        //    for (int i = 0; i < nIterations; i++)
+        //    {
+        //        BalInt balInt = r.Next();
+        //        BalInt balInt1 = balInt << 18;
+        //    }
+        //}
+
+        //[Benchmark]
+        //public void RandomAssignmentToIntAndBitShift()
+        //{
+        //    var r = new Random();
+        //    for (int i = 0; i < nIterations; i++)
+        //    {
+        //        int binInt = r.Next();
+        //        int binInt1 = binInt << 18;
+        //    }
+        //}
+
         [Benchmark]
-        public void RandomAssignmentToBalIntAndTritShift()
+        public void BinaryIntegerAdditionWithTernaryConversion()
         {
             var r = new Random();
             for (int i = 0; i < nIterations; i++)
             {
                 BalInt balInt = r.Next();
-                BalInt balInt1 = balInt << 16;
+                BalInt balInt1 = r.Next();
+                var balIntAddition = balInt + balInt1;
             }
         }
 
         [Benchmark]
-        public void RandomAssignmentToIntAndBitShift()
+        public void TernaryIntegerAdditionWithBinaryConversion()
         {
             var r = new Random();
             for (int i = 0; i < nIterations; i++)
             {
-                int binInt = r.Next();
-                int binInt1 = binInt << 16;
+                BalInt balInt = r.Next();
+                BalInt balInt1 = r.Next();
+                var balIntAddition = balInt.BTADD(balInt1);
             }
         }
-
     }
 
 }
