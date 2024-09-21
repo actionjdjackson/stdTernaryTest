@@ -181,7 +181,7 @@ namespace stdTernary
                 switch (n)
                 {
                     case 0:
-                        balTrits[i] = new BalTrit(0);
+                        balTrits[i] = 0;
                         carry = 0;
                         break;
                     case 1:
@@ -254,11 +254,11 @@ namespace stdTernary
         {
             switch (value)
             {
-                case < 0:
+                case -1:
                     trit = -1;
                     tritChar = '-';
                     break;
-                case > 0:
+                case 1:
                     trit = 1;
                     tritChar = '+';
                     break;
@@ -304,11 +304,11 @@ namespace stdTernary
         {
             switch (value)
             {
-                case < 0:
+                case -1:
                     trit = -1;
                     tritChar = '-';
                     break;
-                case > 0:
+                case 1:
                     trit = 1;
                     tritChar = '+';
                     break;
@@ -1922,14 +1922,17 @@ namespace stdTernary
                     if (value[i] == '+')
                     {
                         exponent[i] = new BalTrit(1);
+                        wholeBalFloat[i] = new BalTrit(1);
                     }
                     else if (value[i] == '-')
                     {
                         exponent[i] = new BalTrit(-1);
+                        wholeBalFloat[i] = new BalTrit(-1);
                     }
                     else if (value[i] == '0')
                     {
                         exponent[i] = new BalTrit(0);
+                        wholeBalFloat[i] = new BalTrit(0);
                     }
                     else
                     {
@@ -1941,14 +1944,17 @@ namespace stdTernary
                     if (value[i] == '+')
                     {
                         significand[i - N_TRITS_EXPONENT] = new BalTrit(1);
+                        wholeBalFloat[i] = new BalTrit(1);
                     }
                     else if (value[i] == '-')
                     {
                         significand[i - N_TRITS_EXPONENT] = new BalTrit(-1);
+                        wholeBalFloat[i] = new BalTrit(-1);
                     }
                     else if (value[i] == '0')
                     {
                         significand[i - N_TRITS_EXPONENT] = new BalTrit(0);
+                        wholeBalFloat[i] = new BalTrit(0);
                     }
                     else
                     {

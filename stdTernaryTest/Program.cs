@@ -15,15 +15,15 @@ namespace stdTernaryTest
 
             //Below is a variety of tests for the stdTernary library. Uncomment whatever interests you. Many were used in debugging.
 
-            //BalFloat fromstring = (BalFloat)"--++00-00++-+0--+-000-++0-0";
-            //BalFloat fromtrits = new BalFloat(fromstring.Value);
-            //fromstring.FloatChars = "--++00-00++-+0--+-000-++0-0".ToCharArray();
-            //string tostring = (string)new BalFloat(-1.2339629040E-138);
-            //BalFloat fromnumber = new BalFloat(-1.2339629040E-138);
-            //Console.WriteLine(fromstring.ToString());
-            //Console.WriteLine(fromtrits.ToString());
-            //Console.WriteLine(tostring);
-            //Console.WriteLine(fromnumber.ToString());
+            BalFloat fromstring = (BalFloat)"--++00-00++-+0--+-+++-++0-0";
+            fromstring.FloatChars = "--++00-00++-+0--+-000-++0-0".ToCharArray();
+            BalFloat fromtrits = new BalFloat(fromstring.Value);
+            string tostring = (string)new BalFloat(-1.2339629040E-138);
+            BalFloat fromnumber = new BalFloat(-1.2339629040E-138);
+            Console.WriteLine(fromstring.ToString());
+            Console.WriteLine(fromtrits.ToString());
+            Console.WriteLine(tostring);
+            Console.WriteLine(fromnumber.ToString());
 
             //BalFloat bal = 1.3340057668999e-10;     //some rounding error depending on whether we round to the nearest 10th or 11th digit (ceiling or floor in precision calculation)
             //var newbal = -bal;                      //checking the negative
@@ -62,7 +62,7 @@ namespace stdTernaryTest
 
             //BalTryte whateverelse = 9800;
             //BalTryte anotherone = (BalTryte)"+++++++++";    //explicit casting of a string to a BalTryte
-            //string yetanotherone = (string)whateverelse;    //explicit casting of a BalType to a string (which only gives the char string of +/-/0, no decimal)
+            //string yetanotherone = (string)whateverelse;    //explicit casting of a BalTryte to a string (which only gives the char string of +/-/0, no decimal)
             //Console.WriteLine(yetanotherone);
 
             //Console.WriteLine(whateverelse);
@@ -194,27 +194,27 @@ namespace stdTernaryTest
     {
         int nIterations = 10000;
 
-        //[Benchmark]
-        //public void RandomAssignmentToBalIntAndTritShift()
-        //{
-        //    var r = new Random();
-        //    for (int i = 0; i < nIterations; i++)
-        //    {
-        //        BalInt balInt = r.Next();
-        //        BalInt balInt1 = balInt << 18;
-        //    }
-        //}
+        [Benchmark]
+        public void RandomAssignmentToBalIntAndTritShift()
+        {
+            var r = new Random();
+            for (int i = 0; i < nIterations; i++)
+            {
+                BalInt balInt = r.Next();
+                BalInt balInt1 = balInt << 18;
+            }
+        }
 
-        //[Benchmark]
-        //public void RandomAssignmentToIntAndBitShift()
-        //{
-        //    var r = new Random();
-        //    for (int i = 0; i < nIterations; i++)
-        //    {
-        //        int binInt = r.Next();
-        //        int binInt1 = binInt << 18;
-        //    }
-        //}
+        [Benchmark]
+        public void RandomAssignmentToIntAndBitShift()
+        {
+            var r = new Random();
+            for (int i = 0; i < nIterations; i++)
+            {
+                int binInt = r.Next();
+                int binInt1 = binInt << 18;
+            }
+        }
 
         [Benchmark]
         public void BinaryIntegerAdditionWithTernaryConversion()
