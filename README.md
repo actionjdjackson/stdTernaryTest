@@ -19,7 +19,7 @@ The `string` conversion is for interoperability with my "Action Ternary Simulato
 
 Will possibly create an unbalanced ternary version of all of this.
 
-`Tryte` and `FloatT` and `IntT` have modifiable static integer values which is where you can "customize" them to certain sizes - `N_TRITS_PER_TRYTE`, and `N_TOTAL_TRITS` (`N_TRITS_SIGNIFICAND` and `N_TRITS_EXPONENT` too), and `N_TRITS_PER_INT` respectively.
+`Tryte` and `FloatT` and `IntT` have modifiable static integer values which is where you can "customize" them to certain sizes - `N_TRITS_PER_TRYTE`, and `N_TOTAL_TRITS_FLOAT` (`N_TRITS_SIGNIFICAND` and `N_TRITS_EXPONENT` too), and `N_TRITS_PER_INT` respectively.
 
 I throw a lot of Exceptions when dealing with numbers outside the range of the Balanced Ternary stucts' acceptable values - which is annoying so I might change it to a "zero" value whenever the values are too large  (either positive or negative) and type casting is involved.
 
