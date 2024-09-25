@@ -11,9 +11,9 @@ Includes a customizable `IntT` struct that can have any number of total trits in
 
 Also includes a customizable `FloatT` struct that can have any number of total trits, separated into a exponent and a significand, 1/4 going to the exponent and 3/4 going to the significand (mantissa). It doesn't have to be a multiple of 3, though that is preferable (27 is a nice number, currently using 24). The `FloatT` struct holds a combination of an array of `Trit`s for the exponent and the signficand and the whole float combined, and a `double` for binary equivalent and math operations.
 
-Will soon test actual Ternary math for future implementation on Ternary hardware. (Right now I'm performing the math in binary (with `double`s and `short`s and `long`s and then converting back to Ternary).
+Will soon test actual Ternary math for future implementation on Ternary hardware. (Right now I'm performing the math in binary with `double`s and `short`s and `long`s and then converting back to Ternary.)
 
-Also includes most of the `Math` functions specifically for use with these `FloatT`s in a static class called `TernaryMath`. I also added a `Log3` function and trit increment/decrement for `FloatT`s.
+Also includes most of the `Math` functions specifically for use with these `FloatT`s in a static class called `MathT`. I also added a `Log3` function and trit increment/decrement for `FloatT`s.
 
 The `string` conversion is for interoperability with my "Action Ternary Simulator" which runs on strings of `+, -, and 0` characters and does all the math in Ternary.
 
