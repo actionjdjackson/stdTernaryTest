@@ -11,7 +11,12 @@ namespace stdTernaryTest
         static void Main(string[] args)
         {
 
-            var summary = BenchmarkRunner.Run<Benchmarks>();
+            //var summary = BenchmarkRunner.Run<Benchmarks>();
+
+            FloatT a = -1.5;
+            FloatT b = 3.5;
+            var result = a + b;
+            Console.WriteLine(result.ToString());
 
             //Tryte tryte = Tryte.MaxValue;
             //Console.WriteLine(tryte.ToString());
