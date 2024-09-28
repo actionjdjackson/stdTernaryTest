@@ -321,8 +321,8 @@ namespace stdTernary
         public static Trit operator !(Trit trit) => trit.NEG();
         public static Trit operator *(Trit left, Trit right) => left.MULT(right);
         public static Trit operator +(Trit left, Trit right) => left.SUM(right);
-        public static bool operator ==(Trit left, Trit right) => left.Value == right.Value;
-        public static bool operator !=(Trit left, Trit right) => left.Value != right.Value;
+        public static bool operator ==(Trit left, Trit right) => (bool)left.EQUAL(right);
+        public static bool operator !=(Trit left, Trit right) => (bool)left.NOTEQUAL(right);
         public static bool operator >(Trit left, Trit right) => left.Value > right.Value;
         public static bool operator <(Trit left, Trit right) => left.Value < right.Value;
         public static bool operator >=(Trit left, Trit right) => left.Value >= right.Value;
@@ -541,6 +541,22 @@ namespace stdTernary
             else
             {
                 return new Trit(-1);
+            }
+        }
+
+        public static Trit COMPARET(Trit a, Trit b)
+        {
+            if (a.Value < b.Value)
+            {
+                return new Trit(-1);
+            }
+            else if (a.Value > b.Value)
+            {
+                return new Trit(1);
+            }
+            else
+            {
+                return new Trit(0);
             }
         }
     }
@@ -1673,8 +1689,8 @@ namespace stdTernary
         public Trit[] Value { get => floatt; set => SetValue(value); }
         public string FloatTString { get => ConvertToStringRepresentation(); }
 
-        public static bool operator ==(FloatT left, FloatT right) => EqualityComparer<Trit[]>.Default.Equals(left.Value, right.Value);
-        public static bool operator !=(FloatT left, FloatT right) => !EqualityComparer<Trit[]>.Default.Equals(left.Value, right.Value);
+        public static bool operator ==(FloatT left, FloatT right) => left.EQUALTO(right);
+        public static bool operator !=(FloatT left, FloatT right) => !left.EQUALTO(right);
         public static bool operator ==(FloatT left, double right) => left.doubleValue == right;
         public static bool operator !=(FloatT left, double right) => left.doubleValue != right;
         public static bool operator >(FloatT left, FloatT right) => left.GREATERTHAN(right);
@@ -1718,7 +1734,8 @@ namespace stdTernary
 
         public static int ExpectedNDigitsOfPrecision(Tryte exp)
         {
-            return (int)Math.Abs(Math.Ceiling(Math.Log10(MathT.Abs(exp) / Math.Pow(3, FloatT.N_TRITS_SIGNIFICAND))));
+            //return (int)Math.Abs(Math.Ceiling(Math.Log10(MathT.Abs(exp) / Math.Pow(3, FloatT.N_TRITS_SIGNIFICAND))));
+            return 7;
         }
 
         /// <summary>
@@ -2077,6 +2094,18 @@ namespace stdTernary
             return new Trit(0);
         }
 
+        public bool EQUALTO(FloatT f)
+        {
+            for (Tryte i = 0; i < (Tryte)N_TRITS_TOTAL_FLOAT; i++)
+            {
+                if (this.floatt[i] != f.floatt[i])
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
         public bool LESSOREQUAL(FloatT f)
         {
             for (byte i = 0; i < N_TRITS_TOTAL_FLOAT; i++)  //first checks the exponent
@@ -2199,6 +2228,40 @@ namespace stdTernary
             return new FloatT(trits);
         }
 
+        public (FloatT, FloatT) DIVREM(FloatT divisor)
+        {
+            if (COMPARET(divisor, 0).Value == Trit.TritVal.z)
+            {
+                throw new DivideByZeroException("Attempt to divide by zero in IntT division operation.");
+            }
+            else if (COMPARET(MathT.Abs(this), MathT.Abs(divisor)).Value == Trit.TritVal.p)
+            {
+                var divd = MathT.Abs(this);
+                var divsr = MathT.Abs(divisor);
+                var quot = new FloatT(0);
+                var rem = new FloatT(divd.Value);
+
+                while (COMPARET(rem, divsr).Value != Trit.TritVal.n)
+                {
+                    rem = rem - divsr;
+                    quot = quot + 1;
+                }
+                if (COMPARET(this, 0).Value == Trit.TritVal.n ^ COMPARET(divisor, 0).Value == Trit.TritVal.n)
+                {
+                    quot = quot.INVERT();
+                }
+                return (quot, rem);
+            }
+            else if (COMPARET(this, divisor).Value == Trit.TritVal.z)
+            {
+                return (new FloatT(1), new FloatT(0));
+            }
+            else
+            {
+                return (new FloatT(0), new FloatT(0));
+            }
+        }
+
         public FloatT MULT(FloatT f)
         {
             var floatAExp = new Tryte(this.exponent);
@@ -2229,7 +2292,7 @@ namespace stdTernary
             var floatBExp = new Tryte(f.exponent);
             if (Tryte.COMPARET(floatAExp, floatBExp).Value == Trit.TritVal.z)
             {
-                (var addedSigs, var carry) = AddSignificands(this.significand, f.significand);
+                (var addedSigs, var carry) = AddSignificands(this.significand, f.significand, checkForLeadingZero: true);
                 Tryte newExp = floatAExp + carry;
                 if (Tryte.COMPARET(newExp, MaxExponentValue + 1).Value == Trit.TritVal.n)
                 {
@@ -2676,7 +2739,7 @@ namespace stdTernary
                         break;
                 }
                 tempB = TritShiftLeft(tempB, N_TRITS_SIGNIFICAND - i - 1);
-                (product, carry) = AddSignificands(product, tempB);
+                (product, carry) = AddSignificands(product, tempB, checkForLeadingZero: false);
                 nShiftsLeft = nShiftsLeft - carry;
                 if ((N_TRITS_SIGNIFICAND - i - 1) > 0)
                 {
@@ -2698,7 +2761,7 @@ namespace stdTernary
             return (finalProduct, bigCarry);
         }
 
-        public static (Trit[], Trit) AddSignificands(Trit[] sigA, Trit[] sigB)
+        public static (Trit[], Trit) AddSignificands(Trit[] sigA, Trit[] sigB, bool checkForLeadingZero = true)
         {
             Trit[] temp = new Trit[sigA.Length];
             Trit carry = 0;
@@ -2745,6 +2808,11 @@ namespace stdTernary
                     temp = TritShiftRight(temp, 1);
                     temp[0] = carry;
                     return (temp, 1);
+                }
+                if (checkForLeadingZero && i == 0 && carry == 0 && temp[0].Value == Trit.TritVal.z)
+                {
+                    temp = TritShiftLeft(temp, 1);
+                    return (temp, -1);
                 }
             }
             return (temp, 0);

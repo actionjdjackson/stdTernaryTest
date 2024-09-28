@@ -13,11 +13,46 @@ namespace stdTernaryTest
 
             //var summary = BenchmarkRunner.Run<Benchmarks>();
 
-            
-            FloatT a = 50;
-            FloatT b = 20;
-            var result = a * b;
-            FloatT shouldEqual = 1000;
+            FloatT a = 10;
+            FloatT b = 2.5;
+            (var result, var remainder) = a.DIVREM(b);
+            FloatT shouldEqual = 4;
+            Console.WriteLine(a.ToString());
+            Console.WriteLine(b.ToString());
+            Console.WriteLine(result.ToString());
+            Console.WriteLine(shouldEqual.ToString());
+
+            a = 5.256;
+            b = 12.134;
+            result = a + b;
+            shouldEqual = 17.39;
+            Console.WriteLine(a.ToString());
+            Console.WriteLine(b.ToString());
+            Console.WriteLine(result.ToString());
+            Console.WriteLine(shouldEqual.ToString());
+
+            a = 12000.5;
+            b = 12000.0;
+            result = a - b;
+            shouldEqual = 0.5;
+            Console.WriteLine(a.ToString());
+            Console.WriteLine(b.ToString());
+            Console.WriteLine(result.ToString());
+            Console.WriteLine(shouldEqual.ToString());
+
+            a = 15;
+            b = 27;
+            result = a - b;
+            shouldEqual = -12;
+            Console.WriteLine(a.ToString());
+            Console.WriteLine(b.ToString());
+            Console.WriteLine(result.ToString());
+            Console.WriteLine(shouldEqual.ToString());
+
+            a = 50;
+            b = 20;
+            result = a * b;
+            shouldEqual = 1000;
             Console.WriteLine(a.ToString());
             Console.WriteLine(b.ToString());
             Console.WriteLine(result.ToString());
@@ -34,7 +69,6 @@ namespace stdTernaryTest
             Console.WriteLine(b.ToString());
             Console.WriteLine(result.ToString());
             Console.WriteLine(shouldEqual.ToString());
-
 
             digits = result.ExpectedNDigitsOfPrecision();
             Console.WriteLine(digits.ToString());
