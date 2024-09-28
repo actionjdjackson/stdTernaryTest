@@ -13,10 +13,31 @@ namespace stdTernaryTest
 
             //var summary = BenchmarkRunner.Run<Benchmarks>();
 
-            FloatT a = -1.5;
-            FloatT b = 3.5;
-            var result = a + b;
+            
+            FloatT a = 50;
+            FloatT b = 20;
+            var result = a * b;
+            FloatT shouldEqual = 1000;
+            Console.WriteLine(a.ToString());
+            Console.WriteLine(b.ToString());
             Console.WriteLine(result.ToString());
+            Console.WriteLine(shouldEqual.ToString());
+
+            var digits = result.ExpectedNDigitsOfPrecision();
+            Console.WriteLine(digits.ToString());
+
+            a = (FloatT)"00000++-+000000000000000";
+            b = (FloatT)"00000+-+0000000000000000";
+            result = a * b;
+            shouldEqual = (FloatT)"00000+-+++00000000000000";
+            Console.WriteLine(a.ToString());
+            Console.WriteLine(b.ToString());
+            Console.WriteLine(result.ToString());
+            Console.WriteLine(shouldEqual.ToString());
+
+
+            digits = result.ExpectedNDigitsOfPrecision();
+            Console.WriteLine(digits.ToString());
 
             //Tryte tryte = Tryte.MaxValue;
             //Console.WriteLine(tryte.ToString());

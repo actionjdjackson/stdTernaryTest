@@ -148,7 +148,7 @@ namespace stdTernary
         /// Calculates the integer (IntT) equivalent of the ternary logarithm (base 3) of a FloatT
         /// </summary>
         /// <param name="f"></param>
-        /// <returns>BalInt base 3 logarithm of f</returns>
+        /// <returns>IntT base 3 logarithm of f</returns>
         public static IntT ILogT(FloatT f)
         {
             return new IntT((long)Math.Floor(Math.Log(f.DoubleValue) / Math.Log(3)));
@@ -216,7 +216,7 @@ namespace stdTernary
         /// Increments a FloatT by one trit, returning the result
         /// </summary>
         /// <param name="f"></param>
-        /// <returns>A new, incremented BalFloat</returns>
+        /// <returns>A new, incremented FloatT</returns>
         public static FloatT TritIncrement(FloatT f)
         {
             sbyte carry = 1;
@@ -255,7 +255,7 @@ namespace stdTernary
         /// Decrements a FloatT by one trit, returning the result
         /// </summary>
         /// <param name="f"></param>
-        /// <returns>A new, incremented BalFloat</returns>
+        /// <returns>A new, incremented FloatT</returns>
         public static FloatT TritDecrement(FloatT f)
         {
             sbyte carry = -1;
@@ -610,6 +610,7 @@ namespace stdTernary
         public static implicit operator Tryte(int intValue) => (intValue <= MaxValue && intValue >= MinValue) ? new Tryte((short)intValue) : throw new ArithmeticException("Tried to assign to a tryte an int that has a magnitude too big for a tryte of " + N_TRITS_PER_TRYTE + " trits");
         public static explicit operator string(Tryte tryte) => tryte.TryteString;
         public static explicit operator Tryte(string str) => new Tryte(str);
+        public static implicit operator double(Tryte tryte) => tryte.shortValue;
 
         public Tryte(Trit[] value)
         {
@@ -984,14 +985,47 @@ namespace stdTernary
 
         public Tryte ADD(Tryte t)
         {
-            int temp = this.shortValue + t.shortValue;
-            if (temp > MaxValue || temp < MinValue)
+            Trit[] sumTrits = new Trit[N_TRITS_PER_TRYTE];
+            sbyte carry = 0;
+            for (int i = N_TRITS_PER_TRYTE - 1; i >= 0; i--)
             {
-                throw new OverflowException("Integer addition resulted in an overflow - result too big for a tryte with " + N_TRITS_PER_TRYTE + " trits");
+                sbyte n = (sbyte)((sbyte)this.tryte[i].Value + (sbyte)t.Value[i].Value + carry);
+                switch (n)
+                {
+                    case 2:
+                        carry = 1;
+                        sumTrits[i] = -1;
+                        break;
+                    case -2:
+                        carry = -1;
+                        sumTrits[i] = 1;
+                        break;
+                    case 3:
+                        carry = 1;
+                        sumTrits[i] = 0;
+                        break;
+                    case -3:
+                        carry = -1;
+                        sumTrits[i] = 0;
+                        break;
+                    default:
+                        carry = 0;
+                        sumTrits[i] = n;
+                        break;
+                }
             }
-            else
+            switch (carry)
             {
-                return new Tryte((short)temp);
+                case 0:
+                    return new Tryte(sumTrits);
+                case 1:
+                    throw new OverflowException("Tryte Integer Add Positive Overflow! You've gone beyond what an Tryte of size " + N_TRITS_PER_TRYTE + " trits can hold");
+                //return MaxValue;
+                case -1:
+                    throw new OverflowException("Tryte Integer Add Negative Overflow! You've gone beyond what an Tryte of size " + N_TRITS_PER_TRYTE + " trits can hold");
+                //return MinValue;
+                default:
+                    return new Tryte(sumTrits);
             }
         }
 
@@ -1577,7 +1611,7 @@ namespace stdTernary
 
 
     /// <summary>
-    /// The BalFloat struct is a modifiable general purpose Balanced Ternary floating point number with trits and a double. Can be customized
+    /// The FloatT struct is a modifiable general purpose Balanced Ternary floating point number with trits and a double. Can be customized
     /// by changing the N_TRITS_TOTAL static parameter, and the fractions in the N_TRITS_SIGNIFICAND and N_TRITS_EXPONENT static parameters.
     /// </summary>
     public struct FloatT
@@ -1594,10 +1628,6 @@ namespace stdTernary
         /// The number of trits used for the exponent in the FloatT - the magnitude. Currently set to 1/4 of the total trits rounded down.
         /// </summary>
         public static byte N_TRITS_EXPONENT = (byte)Math.Floor((double)N_TRITS_TOTAL_FLOAT / 4);
-        /// <summary>
-        /// The calculated number of digits of precision with a given N_TRITS_SIGNIFICAND
-        /// </summary>
-        public static byte N_DIGITS_PRECISION = (byte)Math.Abs(Math.Floor(Math.Log10(1 / Math.Pow(3, N_TRITS_SIGNIFICAND))));
         /// <summary>
         /// The smallest representable value for the FloatT
         /// </summary>
@@ -1623,19 +1653,19 @@ namespace stdTernary
         public static FloatT NegativeInfinity = Double.NegativeInfinity;
 
         /// <summary>
-        /// The exponent component of the BalFloat as an array of BalTrits
+        /// The exponent component of the FloatT as an array of Trits
         /// </summary>
         private Trit[] exponent;
         /// <summary>
-        /// The significand component of the BalFloat as an array of BalTrits
+        /// The significand component of the FloatT as an array of Trits
         /// </summary>
         private Trit[] significand;
         /// <summary>
-        /// The whole BalFloat value as an array of BalTrits
+        /// The whole FloatT value as an array of Trits
         /// </summary>
         private Trit[] floatt;
         /// <summary>
-        /// The BalFloat value represented as a binary double
+        /// The FloatT value represented as a binary double
         /// </summary>
         private double doubleValue;
 
@@ -1657,11 +1687,11 @@ namespace stdTernary
         public static bool operator <=(FloatT left, double right) => left.doubleValue <= right;
         public static FloatT operator +(FloatT left, FloatT right) => left.ADD(right);
         public static FloatT operator -(FloatT left, FloatT right) => left.SUB(right);
-        public static FloatT operator *(FloatT left, FloatT right) => new FloatT(left.doubleValue * right.doubleValue);
+        public static FloatT operator *(FloatT left, FloatT right) => left.MULT(right);
         public static FloatT operator /(FloatT left, FloatT right) => new FloatT(left.doubleValue / right.doubleValue);
         public static FloatT operator %(FloatT left, FloatT right) => new FloatT(left.doubleValue % right.doubleValue);
-        //public static BalFloat operator ++(BalFloat left) => new BalFloat(left.doubleValue += 1); 
-        //public static BalFloat operator --(BalFloat left) => new BalFloat(left.doubleValue -= 1); //not sure if ++ or -- are appropriate for a floating point number
+        //public static FloatT operator ++(FloatT left) => new FloatT(left.doubleValue += 1); 
+        //public static FloatT operator --(FloatT left) => new FloatT(left.doubleValue -= 1); //not sure if ++ or -- are appropriate for a floating point number
         public static FloatT operator +(FloatT floatt) => new FloatT(Math.Abs(floatt.doubleValue));
         public static FloatT operator -(FloatT floatt) => new FloatT(-floatt.doubleValue);
 
@@ -1681,8 +1711,18 @@ namespace stdTernary
             return HashCode.Combine(floatt);
         }
 
+        public int ExpectedNDigitsOfPrecision()
+        {
+            return (int)Math.Abs(Math.Ceiling(Math.Log10(MathT.Abs(new Tryte(this.exponent)) / Math.Pow(3, FloatT.N_TRITS_SIGNIFICAND))));
+        }
+
+        public static int ExpectedNDigitsOfPrecision(Tryte exp)
+        {
+            return (int)Math.Abs(Math.Ceiling(Math.Log10(MathT.Abs(exp) / Math.Pow(3, FloatT.N_TRITS_SIGNIFICAND))));
+        }
+
         /// <summary>
-        /// Constructor for BalFloat struct, passing in a double as the value to be converted to Ternary
+        /// Constructor for FloatT struct, passing in a double as the value to be converted to Ternary
         /// </summary>
         /// <param name="value">The double value to be converted to Ternary</param>
         public FloatT(double value)
@@ -1716,8 +1756,7 @@ namespace stdTernary
             }
             else     //real, nonzero numbers are calculated here
             {
-                //this.doubleValue = value;
-                doubleValue = RoundToNearestDigitOfPrecision(value);
+                this.doubleValue = value;
                 int exponentValueBase3 = (int)Math.Ceiling((Math.Log(Math.Abs(doubleValue)) - Math.Log(0.5)) / Math.Log(3));  //calculate the exponent of 3 (magnitude)
                 double significandValue = doubleValue / Math.Pow(3, exponentValueBase3);    //calculate the significand double value
                 double remainder;   //remainder is how much is left after coverting to balanced ternary
@@ -1732,6 +1771,8 @@ namespace stdTernary
                 {
                     floatt[i] = significand[i - N_TRITS_EXPONENT];
                 }
+                doubleValue = RoundToNearestDigitOfPrecision(value, new Tryte(exponent));
+
             }
         }
 
@@ -1778,7 +1819,7 @@ namespace stdTernary
                     double exponentValue = (double)Math.Pow(3, ConvertBalancedTritsToInteger(exponent));  //double for the exponent
                     double significandValue = ConvertBalancedTritsToDouble(significand);    //and double for the significand
                     doubleValue = significandValue * exponentValue; // multiply them together to get the final value
-                    doubleValue = RoundToNearestDigitOfPrecision(doubleValue);  //round to nearest digit of precision
+                    doubleValue = RoundToNearestDigitOfPrecision(doubleValue, new Tryte(exponent));  //round to nearest digit of precision
                 }
             }
             else
@@ -1788,9 +1829,9 @@ namespace stdTernary
         }
 
         /// <summary>
-        /// Constructor for the BalFloat taking an array of BalTrits to be converted to binary
+        /// Constructor for the FloatT taking an array of Trits to be converted to binary
         /// </summary>
-        /// <param name="value">The array of BalTrits to pass into the constructor</param>
+        /// <param name="value">The array of Trits to pass into the constructor</param>
         public FloatT(Trit[] value)
         {
             if (value.Length == N_TRITS_TOTAL_FLOAT)
@@ -1835,7 +1876,7 @@ namespace stdTernary
                     double exponentValue = (double)Math.Pow(3, ConvertBalancedTritsToInteger(exponent));  //double for the exponent
                     double significandValue = ConvertBalancedTritsToDouble(significand);    //and double for the significand
                     doubleValue = significandValue * exponentValue; // multiply them together to get the final value
-                    doubleValue = RoundToNearestDigitOfPrecision(doubleValue);  //round to nearest digit of precision
+                    doubleValue = RoundToNearestDigitOfPrecision(doubleValue, new Tryte(exponent));  //round to nearest digit of precision
                 }
 
             }
@@ -1925,13 +1966,13 @@ namespace stdTernary
                     double exponentValue = (double)Math.Pow(3, ConvertBalancedTritsToInteger(exponent));  //integer for the exponent
                     double significandValue = ConvertBalancedTritsToDouble(significand);    //and double for the significand
                     doubleValue = significandValue * exponentValue; // multiply them together to get the final value
-                    doubleValue = RoundToNearestDigitOfPrecision(doubleValue);
+                    doubleValue = RoundToNearestDigitOfPrecision(doubleValue, new Tryte(exponent));
                 }
 
             }
             else
             {
-                throw new ArgumentException("Char array passed to BalFloat SetValue method was not the expected size - should be " + N_TRITS_TOTAL_FLOAT + " chars in length", "value");
+                throw new ArgumentException("Char array passed to FloatT SetValue method was not the expected size - should be " + N_TRITS_TOTAL_FLOAT + " chars in length", "value");
             }
         }
 
@@ -1959,48 +2000,47 @@ namespace stdTernary
         }
 
         /// <summary>
-        /// Rounds to the nearest digit of precision as calculated in the static member N_DIGITS_PRECISION.
-        /// If it's a whole number, it returns the whole number. If it's in scientific notation, it returns
-        /// a rounded version, and if it's a floating point number not in scientific notation, it rounds
-        /// to the nearest digit of precision including the digits before the floating point.
+        /// Rounds to the nearest digit of precision as calculated by the formula in ExpectedNDigitsOfPrecision.
+        /// Takes a double and a Tryte for calculation.
         /// </summary>
         /// <param name="doubleValue">The double value passed in to be rounded</param>
+        /// <param name="exp">The exponent to be used in the calculation</param>
         /// <returns>The double value of the rounded floating point number</returns>
-        public static double RoundToNearestDigitOfPrecision(double doubleValue)
+        public static double RoundToNearestDigitOfPrecision(double doubleValue, Tryte exp)
         {
-            var doubleString = doubleValue.ToString();
-            if (doubleString.Contains('E'))
-            {
-                var sigsplit = doubleString.Split('E');
-                var significand = double.Parse(sigsplit[0]);
-                significand = Math.Round(significand, N_DIGITS_PRECISION - 1);
-                return significand * Math.Pow(10, int.Parse(sigsplit[1]));
-            }
-            else
-            {
-                doubleString = Math.Abs(doubleValue).ToString();
-                if (doubleString.Contains('.'))
-                {
-                    var splitString = doubleString.Split('.');
-                    var split = splitString[0];
-                    if (split == "0")
-                    {
-                        return Math.Round(doubleValue, N_DIGITS_PRECISION);
-                    }
-                    else if (split.Length <= N_DIGITS_PRECISION)
-                    {
-                        return Math.Round(doubleValue, N_DIGITS_PRECISION - split.Length);
-                    }
-                    else
-                    {
-                        return Math.Round(doubleValue, 0);
-                    }
-                }
-                else
-                {
-                    return doubleValue;
-                }
-            }
+            var doubleString = doubleValue.ToString("E");
+            //if (doubleString.Contains('E'))
+            //{
+            var sigsplit = doubleString.Split('E');
+            var significand = double.Parse(sigsplit[0]);
+            significand = Math.Round(significand, ExpectedNDigitsOfPrecision(exp));
+            return significand * Math.Pow(10, int.Parse(sigsplit[1]));
+            //}
+            //else
+            //{
+            //    doubleString = Math.Abs(doubleValue).ToString();
+            //    if (doubleString.Contains('.'))
+            //    {
+            //        var splitString = doubleString.Split('.');
+            //        var split = splitString[0];
+            //        if (split == "0")
+            //        {
+            //            return Math.Round(doubleValue, N_DIGITS_PRECISION);
+            //        }
+            //        else if (split.Length <= N_DIGITS_PRECISION)
+            //        {
+            //            return Math.Round(doubleValue, N_DIGITS_PRECISION - split.Length);
+            //        }
+            //        else
+            //        {
+            //            return Math.Round(doubleValue, 0);
+            //        }
+            //    }
+            //    else
+            //    {
+            //        return doubleValue;
+            //    }
+            //}
         }
 
         /// <summary>
@@ -2052,11 +2092,11 @@ namespace stdTernary
             }
             //for (byte i = 0; i < N_TRITS_SIGNIFICAND; i++)   //same with the significand
             //{
-            //    if (significand[i] < balFloat.significand[i])
+            //    if (significand[i] < FloatT.significand[i])
             //    {
             //        return true;
             //    }
-            //    else if (significand[i] > balFloat.significand[i])
+            //    else if (significand[i] > FloatT.significand[i])
             //    {
             //        return false;
             //    }
@@ -2079,11 +2119,11 @@ namespace stdTernary
             }
             //for (byte i = 0; i < N_TRITS_SIGNIFICAND; i++)
             //{
-            //    if (significand[i] > balFloat.significand[i])
+            //    if (significand[i] > FloatT.significand[i])
             //    {
             //        return true;
             //    }
-            //    else if (significand[i] < balFloat.significand[i])
+            //    else if (significand[i] < FloatT.significand[i])
             //    {
             //        return false;
             //    }
@@ -2106,11 +2146,11 @@ namespace stdTernary
             }
             //for (byte i = 0; i < N_TRITS_SIGNIFICAND; i++)
             //{
-            //    if (significand[i] < balFloat.significand[i])
+            //    if (significand[i] < FloatT.significand[i])
             //    {
             //        return true;
             //    }
-            //    else if (significand[i] > balFloat.significand[i])
+            //    else if (significand[i] > FloatT.significand[i])
             //    {
             //        return false;
             //    }
@@ -2133,11 +2173,11 @@ namespace stdTernary
             }
             //for (byte i = 0; i < N_TRITS_SIGNIFICAND; i++)
             //{
-            //    if (significand[i] > balFloat.significand[i])
+            //    if (significand[i] > FloatT.significand[i])
             //    {
             //        return true;
             //    }
-            //    else if (significand[i] < balFloat.significand[i])
+            //    else if (significand[i] < FloatT.significand[i])
             //    {
             //        return false;
             //    }
@@ -2157,6 +2197,16 @@ namespace stdTernary
                 trits[i] = !floatt[i];
             }
             return new FloatT(trits);
+        }
+
+        public FloatT MULT(FloatT f)
+        {
+            var floatAExp = new Tryte(this.exponent);
+            var floatBExp = new Tryte(f.exponent);
+            var sumOfExp = floatAExp + floatBExp;
+            (var multipliedSigs, var bigCarry) = MultiplySignificands(this.significand, f.significand);
+            var newExp = sumOfExp - 1 - (sbyte)bigCarry;
+            return new FloatT(newExp.Value, multipliedSigs);
         }
 
         public FloatT SUB(FloatT f)
@@ -2179,7 +2229,7 @@ namespace stdTernary
             var floatBExp = new Tryte(f.exponent);
             if (Tryte.COMPARET(floatAExp, floatBExp).Value == Trit.TritVal.z)
             {
-                (var addedSigs, var carry) = AddNormalizedSignificands(this.significand, f.significand);
+                (var addedSigs, var carry) = AddSignificands(this.significand, f.significand);
                 Tryte newExp = floatAExp + carry;
                 if (Tryte.COMPARET(newExp, MaxExponentValue + 1).Value == Trit.TritVal.n)
                 {
@@ -2204,8 +2254,8 @@ namespace stdTernary
             else if (Tryte.COMPARET(floatAExp, floatBExp).Value == Trit.TritVal.p)
             {
                 var diff = floatAExp - floatBExp;
-                var shifted = TritShiftRight(f.significand, (int)diff);
-                (var addedSigs, var carry) = AddNormalizedSignificands(shifted, this.significand);
+                var shifted = TritShiftRight(f.significand, diff);
+                (var addedSigs, var carry) = AddSignificands(shifted, this.significand);
                 Tryte newExp = floatAExp + carry;
                 if (Tryte.COMPARET(newExp, MaxExponentValue + 1).Value == Trit.TritVal.n)
                 {
@@ -2230,8 +2280,8 @@ namespace stdTernary
             else if (Tryte.COMPARET(floatAExp, floatBExp).Value == Trit.TritVal.n)
             {
                 var diff = floatBExp - floatAExp;
-                var shifted = TritShiftRight(this.significand, (int)diff);
-                (var addedSigs, var carry) = AddNormalizedSignificands(shifted, f.significand);
+                var shifted = TritShiftRight(this.significand, diff);
+                (var addedSigs, var carry) = AddSignificands(shifted, f.significand);
                 Tryte newExp = floatBExp + carry;
                 if (Tryte.COMPARET(newExp, MaxExponentValue + 1).Value == Trit.TritVal.n)
                 {
@@ -2328,7 +2378,7 @@ namespace stdTernary
             }
             else     //real, nonzero numbers are calculated here
             {
-                doubleValue = RoundToNearestDigitOfPrecision(value);
+                doubleValue = RoundToNearestDigitOfPrecision(value, new Tryte(exponent));
                 int exponentValueBase3 = (int)Math.Ceiling((Math.Log(Math.Abs(doubleValue)) - Math.Log(0.5)) / Math.Log(3));  //calculate the exponent of 3 (magnitude)
                 double significandValue = doubleValue / Math.Pow(3, exponentValueBase3);    //calculate the significand double value
                 double remainder;   //remainder is how much is left after coverting to balanced ternary
@@ -2362,7 +2412,7 @@ namespace stdTernary
             }
             else
             {
-                throw new ArgumentException("Trit array passed to BalFloat SetValue method was not the expected size - should be " + N_TRITS_TOTAL_FLOAT + " trits in length", "value");
+                throw new ArgumentException("Trit array passed to FloatT SetValue method was not the expected size - should be " + N_TRITS_TOTAL_FLOAT + " trits in length", "value");
             }
         }
 
@@ -2418,7 +2468,7 @@ namespace stdTernary
             }
             else
             {
-                throw new ArgumentException("Char array passed to BalFloat SetValue method was not the expected size - should be " + N_TRITS_TOTAL_FLOAT + " chars in length", "value");
+                throw new ArgumentException("Char array passed to FloatT SetValue method was not the expected size - should be " + N_TRITS_TOTAL_FLOAT + " chars in length", "value");
             }
         }
 
@@ -2453,14 +2503,14 @@ namespace stdTernary
                 double exponentValue = (double)Math.Pow(3, ConvertBalancedTritsToInteger(exponent));  //double for the exponent (incluing negative exponents)
                 double significandValue = ConvertBalancedTritsToDouble(significand);    //and double for the significand
                 doubleValue = significandValue * exponentValue; // multiply them together to get the final value
-                doubleValue = RoundToNearestDigitOfPrecision(doubleValue);
+                doubleValue = RoundToNearestDigitOfPrecision(doubleValue, new Tryte(exponent));
             }
         }
 
 
         public static Trit[] ConvertIntegerToBalancedTrits(int integerValue, byte nTrits)
         {
-            Trit[] balTrits = new Trit[nTrits];
+            Trit[] trits = new Trit[nTrits];
             int workValue = Math.Abs(integerValue);     //easier to work with a positive number...
             if (workValue <= (int)((Math.Pow(3, nTrits) - 1) / 2))  //make sure the value passed in is within the nTrits passed maximum value
             {
@@ -2470,13 +2520,13 @@ namespace stdTernary
                     switch (workValue % 3)
                     {
                         case 0:
-                            balTrits[i] = new Trit(0);
+                            trits[i] = new Trit(0);
                             break;
                         case 1:
-                            balTrits[i] = new Trit(1);
+                            trits[i] = new Trit(1);
                             break;
                         case 2:
-                            balTrits[i] = new Trit(-1);
+                            trits[i] = new Trit(-1);
                             break;
                     }
                     workValue = (workValue + 1) / 3;
@@ -2484,17 +2534,17 @@ namespace stdTernary
                 }
                 for (byte j = i; j < nTrits; j++)
                 {
-                    balTrits[j] = new Trit(0);   //...add zeros to fill in to make the length match the nTrits passed in
+                    trits[j] = new Trit(0);   //...add zeros to fill in to make the length match the nTrits passed in
                 }
                 if (integerValue < 0)   //...and invert if it was negative
                 {
                     for (byte n = 0; n < nTrits; n++)
                     {
-                        balTrits[n] = !balTrits[n];
+                        trits[n] = !trits[n];
                     }
                 }
-                Array.Reverse(balTrits);    //...and reverse the trit order so greater numbers are on the left
-                return balTrits;
+                Array.Reverse(trits);    //...and reverse the trit order so greater numbers are on the left
+                return trits;
             }
             else
             {
@@ -2502,11 +2552,11 @@ namespace stdTernary
             }
         }
 
-        public static int ConvertBalancedTritsToInteger(Trit[] balTrits)
+        public static int ConvertBalancedTritsToInteger(Trit[] trits)
         {
             int sum = 0;
-            short exponent = (short)(balTrits.Length - 1);
-            foreach (var trit in balTrits)
+            short exponent = (short)(trits.Length - 1);
+            foreach (var trit in trits)
             {
                 sum += (int)((sbyte)trit.Value * Math.Pow(3, exponent));
                 exponent--;
@@ -2514,11 +2564,11 @@ namespace stdTernary
             return sum;
         }
 
-        public static double ConvertBalancedTritsToDouble(Trit[] balTrits)   //same idea here, except we're counting exponents from -1 to the smallest exponent allowed by the implementation
+        public static double ConvertBalancedTritsToDouble(Trit[] trits)   //same idea here, except we're counting exponents from -1 to the smallest exponent allowed by the implementation
         {
             double sum = 0;
             int exponent = -1;
-            foreach (var trit in balTrits)
+            foreach (var trit in trits)
             {
                 sum += (sbyte)trit.Value * Math.Pow(3, exponent);  //exponents are negative, so it's like doing 1/3^n and adding them up
                 exponent--;
@@ -2526,9 +2576,9 @@ namespace stdTernary
             return sum;
         }
 
-        public static (Trit[], double) ConvertDoubleToBalancedTritsWithRemainder(double doubleValue, int nTrits) //converts double to BalTrits[]
+        public static (Trit[], double) ConvertDoubleToBalancedTritsWithRemainder(double doubleValue, int nTrits) //converts double to Trits[]
         {
-            var balTrits = new Trit[nTrits];
+            var trits = new Trit[nTrits];
             var sum = doubleValue;  //start with the sum total
             for (int exponent = 1; exponent <= nTrits; exponent++)  //start with 1/3
             {
@@ -2538,19 +2588,19 @@ namespace stdTernary
                 if ((diffNegative < diffPositive) && diffNegative < Math.Abs(sum))  //is the negative difference smaller? smaller than if it's a zero?
                 {
                     sum -= -place;   //subtract negative from sum if negative was smaller
-                    balTrits[exponent - 1] = new Trit(-1);
+                    trits[exponent - 1] = new Trit(-1);
                 }
                 else if ((diffPositive < diffNegative) && diffPositive < Math.Abs(sum)) //is the positive difference smaller? smaller than if it's a zero?
                 {
                     sum -= +place;    //subtract positive from sum if positive was smaller
-                    balTrits[exponent - 1] = new Trit(1);
+                    trits[exponent - 1] = new Trit(1);
                 }
                 else
                 {
-                    balTrits[exponent - 1] = new Trit(0);    //if zero was smaller, fill in a zero
+                    trits[exponent - 1] = new Trit(0);    //if zero was smaller, fill in a zero
                 }
             }
-            return (balTrits, sum); //return the array of trits, as well as the remainder (how much of the double value was not considered by the ternary conversion)
+            return (trits, sum); //return the array of trits, as well as the remainder (how much of the double value was not considered by the ternary conversion)
         }
 
         public static Trit[] TritShiftRight(Trit[] trits, Tryte nTrits)
@@ -2570,11 +2620,89 @@ namespace stdTernary
             return temp;
         }
 
-        public static (Trit[], Trit) AddNormalizedSignificands(Trit[] sigA, Trit[] sigB)
+        public static Trit[] TritShiftLeft(Trit[] trits, Tryte nTrits)
         {
-            Trit[] temp = new Trit[N_TRITS_SIGNIFICAND];
+            if (nTrits > 0)
+            {
+                var temp = new Trit[trits.Length];
+                for (Tryte i = 0; i < (Tryte)trits.Length; i++)
+                {
+                    if (i >= trits.Length - nTrits)
+                    {
+                        temp[i] = new Trit(0);
+                    }
+                    else
+                    {
+                        temp[i] = trits[i + nTrits];
+                    }
+                }
+                return temp;
+            }
+            else
+            {
+                return trits;
+            }
+        }
+
+        public static (Trit[], Trit) MultiplySignificands(Trit[] sigA, Trit[] sigB)
+        {
+            Trit[] product = new Trit[N_TRITS_SIGNIFICAND * 2];
+            for (Tryte n = 0; n < (Tryte)N_TRITS_SIGNIFICAND * 2; n++)
+            {
+                product[n] = new Trit(0);
+            }
+            Tryte nShiftsLeft = 0;
             Trit carry = 0;
-            for (Tryte i = N_TRITS_SIGNIFICAND - 1; i >= 0 ; i--)
+            Trit bigCarry = 0;
+            for (Tryte i = N_TRITS_SIGNIFICAND - 1; i >= 0; i--)
+            {
+                Trit[] tempB = new Trit[N_TRITS_SIGNIFICAND * 2];
+                switch (sigA[i].Value)
+                {
+                    case Trit.TritVal.n:
+                        for (Tryte j = N_TRITS_SIGNIFICAND; j < (Tryte)N_TRITS_SIGNIFICAND * 2; j++)
+                        {
+                            tempB[j] = ~sigB[j - N_TRITS_SIGNIFICAND];
+                        }
+                        break;
+                    case Trit.TritVal.p:
+                        sigB.CopyTo(tempB, N_TRITS_SIGNIFICAND);
+                        break;
+                    default:
+                        for (Tryte j = N_TRITS_SIGNIFICAND; j < (Tryte)N_TRITS_SIGNIFICAND * 2; j++)
+                        {
+                            tempB[j] = new Trit(0);
+                        }
+                        break;
+                }
+                tempB = TritShiftLeft(tempB, N_TRITS_SIGNIFICAND - i - 1);
+                (product, carry) = AddSignificands(product, tempB);
+                nShiftsLeft = nShiftsLeft - carry;
+                if ((N_TRITS_SIGNIFICAND - i - 1) > 0)
+                {
+                    nShiftsLeft++;
+                }
+            }
+            Console.WriteLine(nShiftsLeft);
+            product = TritShiftRight(product, nShiftsLeft);
+            Trit[] finalProduct = new Trit[N_TRITS_SIGNIFICAND];
+            for (int i = N_TRITS_SIGNIFICAND; i < N_TRITS_SIGNIFICAND * 2; i++)
+            {
+                finalProduct[i - N_TRITS_SIGNIFICAND] = product[i];
+            }
+            if (finalProduct[0].Value == Trit.TritVal.z)
+            {
+                finalProduct = TritShiftLeft(finalProduct, 1);
+                bigCarry = 1;
+            }
+            return (finalProduct, bigCarry);
+        }
+
+        public static (Trit[], Trit) AddSignificands(Trit[] sigA, Trit[] sigB)
+        {
+            Trit[] temp = new Trit[sigA.Length];
+            Trit carry = 0;
+            for (Tryte i = sigA.Length - 1; i >= 0 ; i--)
             {
                 Tryte a = (sbyte)sigA[i].Value;
                 Tryte b = (sbyte)sigB[i].Value;
